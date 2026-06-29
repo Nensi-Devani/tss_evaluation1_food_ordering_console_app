@@ -43,4 +43,21 @@ folder structure:
 	model
 	service
 	controller
-		
+
+
+design
+class diagram = not in book
+explain
+code
+
+specific error message (email, password)
+
+
+admin can add another admin
+
+* something to go back
+* remove - edit = ask for id (show the table first)
+* admin should not remove it self
+* password regex
+* hide password while typing
+* 500 > then discount in % or menualy (my idea) 

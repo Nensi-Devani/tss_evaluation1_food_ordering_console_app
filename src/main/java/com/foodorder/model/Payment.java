@@ -1,11 +1,12 @@
 package com.foodorder.model;
 
+import com.foodorder.common.Identifiable;
 import com.foodorder.enums.PaymentStatus;
 import com.foodorder.enums.PaymentType;
 
 import java.io.Serializable;
 
-public class Payment implements Serializable {
+public class Payment implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -21,6 +22,7 @@ public class Payment implements Serializable {
         this.paymentStatus = paymentStatus;
     }
 
+    @Override
     public String getId() {
         return id;
     }

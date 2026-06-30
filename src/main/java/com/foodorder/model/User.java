@@ -1,11 +1,12 @@
 package com.foodorder.model;
 
+import com.foodorder.common.Identifiable;
 import com.foodorder.enums.Role;
 import com.foodorder.enums.Status;
 
 import java.io.Serializable;
 
-public class User implements Serializable {
+public class User implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -23,6 +24,7 @@ public class User implements Serializable {
         this.status = status;
     }
 
+    @Override
     public String getId() {
         return id;
     }

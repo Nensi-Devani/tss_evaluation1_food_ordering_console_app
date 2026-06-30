@@ -1,12 +1,13 @@
 package com.foodorder.model;
 
+import com.foodorder.common.Identifiable;
 import com.foodorder.enums.FoodCategory;
 import com.foodorder.enums.FoodType;
 import com.foodorder.enums.Status;
 
 import java.io.Serializable;
 
-public class MenuItem implements Serializable {
+public class MenuItem implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -28,6 +29,7 @@ public class MenuItem implements Serializable {
         this.status = status;
     }
 
+    @Override
     public String getId() {
         return id;
     }

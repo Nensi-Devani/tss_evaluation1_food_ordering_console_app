@@ -1,9 +1,11 @@
 package com.foodorder.model;
 
+import com.foodorder.common.Identifiable;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class OrderOTP implements Serializable {
+public class OrderOTP implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -17,6 +19,7 @@ public class OrderOTP implements Serializable {
         this.generatedAt = generatedAt;
     }
 
+    @Override
     public String getId() {
         return id;
     }

@@ -1,8 +1,10 @@
 package com.foodorder.model;
 
+import com.foodorder.common.Identifiable;
+
 import java.io.Serializable;
 
-public class CartItem implements Serializable {
+public class CartItem implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -16,6 +18,7 @@ public class CartItem implements Serializable {
         this.quantity = quantity;
     }
 
+    @Override
     public String getId() {
         return id;
     }

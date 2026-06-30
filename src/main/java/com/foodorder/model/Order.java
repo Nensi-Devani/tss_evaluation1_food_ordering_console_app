@@ -1,12 +1,13 @@
 package com.foodorder.model;
 
+import com.foodorder.common.Identifiable;
 import com.foodorder.enums.PaymentType;
 import com.foodorder.state.OrderState;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Order implements Serializable {
+public class Order implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -32,6 +33,7 @@ public class Order implements Serializable {
         this.orderState = orderState;
     }
 
+    @Override
     public String getId() {
         return id;
     }

@@ -1,11 +1,12 @@
 package com.foodorder.model;
 
+import com.foodorder.common.Identifiable;
 import com.foodorder.enums.OrderLogAction;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class OrderLog implements Serializable {
+public class OrderLog implements Serializable, Identifiable {
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -21,6 +22,7 @@ public class OrderLog implements Serializable {
         this.actionDateTime = actionDateTime;
     }
 
+    @Override
     public String getId() {
         return id;
     }

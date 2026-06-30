@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileUtil {
+public final class FileUtil {
 
     public static <T> List<T> readData(String filePath) {
         File file = new File(filePath);

@@ -1,4 +1,20 @@
 package com.foodorder.enums;
 
 public enum OrderLogAction {
+    ORDER_PLACED,
+    ORDER_CANCELLED,
+
+    ORDER_PREPARING,
+    ORDER_READY,
+
+    DELIVERY_BOY_ASSIGNED,
+
+    ORDER_OUT_FOR_DELIVERY,
+    ORDER_DELIVERED,
+
+    OTP_GENERATED,
+    OTP_VERIFIED,
+
+    PAYMENT_SUCCESS,
+    PAYMENT_FAILED
 }

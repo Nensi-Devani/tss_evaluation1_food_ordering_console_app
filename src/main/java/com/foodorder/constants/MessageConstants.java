@@ -9,6 +9,7 @@ public class MessageConstants {
     public static final String USER_NOT_FOUND = "User not found.";
     public static final String EMAIL_ALREADY_EXISTS = "Email already exists.";
     public static final String USER_INACTIVE = "User is inactive.";
+    public static final String USER_ADDRESS_NOT_FOUND = "User address not found.";
 
     // Restaurant
     public static final String RESTAURANT_NOT_FOUND = "Restaurant not found.";

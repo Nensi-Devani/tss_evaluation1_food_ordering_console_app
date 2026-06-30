@@ -2,6 +2,7 @@ package com.foodorder.constants;
 
 public final class IdConstants {
     public static final String USER_ID_PREFIX = "USR";
+    public static final String USER_ADDRESS_ID_PREFIX = "USRA";
     public static final String RESTAURANT_ID_PREFIX = "RES";
     public static final String MENU_ITEM_ID_PREFIX = "MI";
     public static final String CART_ID_PREFIX = "CRT";

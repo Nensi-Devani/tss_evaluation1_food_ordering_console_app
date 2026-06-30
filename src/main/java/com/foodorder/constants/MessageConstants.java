@@ -29,6 +29,7 @@ public class MessageConstants {
     public static final String ORDER_NOT_FOUND = "Order not found.";
     public static final String ORDER_CANNOT_CANCEL = "Order cannot be cancelled after it is ready for delivery.";
     public static final String INVALID_ORDER_STATE = "Invalid order state.";
+    public static final String ORDER_ITEM_NOT_FOUND = "Order item not found.";
 
     // Payment
     public static final String PAYMENT_FAILED = "Payment failed.";

@@ -1,4 +1,7 @@
 package com.foodorder.exception;
 
-public class UserNotFoundException {
+public class UserNotFoundException extends ApplicationException{
+    public UserNotFoundException(String message) {
+        super(message);
+    }
 }

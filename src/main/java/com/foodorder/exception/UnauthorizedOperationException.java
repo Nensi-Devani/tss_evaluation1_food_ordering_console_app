@@ -1,4 +1,7 @@
 package com.foodorder.exception;
 
-public class UnauthorizedOperationException {
+public class UnauthorizedOperationException extends ApplicationException {
+    public UnauthorizedOperationException(String message) {
+        super(message);
+    }
 }

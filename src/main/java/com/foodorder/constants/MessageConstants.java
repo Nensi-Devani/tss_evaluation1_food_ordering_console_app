@@ -23,6 +23,7 @@ public class MessageConstants {
     public static final String CART_NOT_FOUND = "Cart not found.";
     public static final String CART_EMPTY = "Cart is empty.";
     public static final String DIFFERENT_RESTAURANT_CART = "Cart can contain items from only one restaurant.";
+    public static final String CART_ITEM_NOT_FOUND = "Cart item not found.";
 
     // Order
     public static final String ORDER_NOT_FOUND = "Order not found.";

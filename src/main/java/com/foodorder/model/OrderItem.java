@@ -14,6 +14,9 @@ public class OrderItem implements Serializable, Identifiable {
     private double discount;
     private int quantity;
 
+    public OrderItem(){
+    }
+
     public OrderItem(String orderId, String menuItemId, double price, double discount, int quantity) {
         this.orderId = orderId;
         this.menuItemId = menuItemId;

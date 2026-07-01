@@ -3,6 +3,7 @@ package com.foodorder.repository;
 import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.enums.Role;
 import com.foodorder.enums.Status;
 import com.foodorder.exception.UserNotFoundException;
 import com.foodorder.model.User;
@@ -90,5 +91,18 @@ public class UserRepository {
         }
 
         return inactiveUsers;
+    }
+
+    public List<User> findAllDeliveryBoys() {
+        List<User> users = FileUtil.readData(FileConstants.USERS_FILE);
+
+        List<User> deliveryBoys = new ArrayList<>();
+
+        for (User user : users) {
+            if (user.getRole() == Role.DELIVERY_BOY)
+                deliveryBoys.add(user);
+        }
+
+        return deliveryBoys;
     }
 }

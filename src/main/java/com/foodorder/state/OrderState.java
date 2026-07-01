@@ -1,4 +1,8 @@
 package com.foodorder.state;
 
-public class OrderState {
+import com.foodorder.model.Order;
+
+public interface OrderState {
+    void next(Order order);
+    String getStatus();
 }

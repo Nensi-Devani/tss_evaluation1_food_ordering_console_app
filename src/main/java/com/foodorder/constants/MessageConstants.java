@@ -4,6 +4,7 @@ public class MessageConstants {
     // Authentication
     public static final String INVALID_EMAIL_OR_PASSWORD = "Invalid email or password.";
     public static final String ACCESS_DENIED = "You are not authorized to perform this operation.";
+    public static final String INVALID_CREDENTIALS = "Invalid Credentials";
 
     // User
     public static final String USER_NOT_FOUND = "User not found.";

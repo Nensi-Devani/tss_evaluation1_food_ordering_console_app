@@ -1,17 +1,24 @@
 package com.foodorder.service;
 
 import java.util.List;
+import java.util.Scanner;
 
+import com.foodorder.constants.FileConstants;
+import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
 import com.foodorder.enums.Role;
 import com.foodorder.enums.Status;
 import com.foodorder.exception.DuplicateEmailException;
 import com.foodorder.exception.UnauthorizedOperationException;
+import com.foodorder.model.Restaurant;
 import com.foodorder.model.User;
+import com.foodorder.repository.RestaurantRepository;
 import com.foodorder.repository.UserRepository;
+import com.foodorder.util.IdGenerator;
 
 public class UserService {
     private final UserRepository userRepository = new UserRepository();
+    private final RestaurantRepository restaurantRepository = new RestaurantRepository();
 
     public void register(User user) {
         User existingUser = userRepository.findByEmail(user.getEmail());
@@ -22,12 +29,35 @@ public class UserService {
 
         if (user.getRole() == Role.CUSTOMER) {
             user.setStatus(Status.ACTIVE);
-        } else if (user.getRole() == Role.RESTAURANT
-                || user.getRole() == Role.DELIVERY_BOY) {
+        } else if (user.getRole() == Role.RESTAURANT || user.getRole() == Role.DELIVERY_BOY) {
             user.setStatus(Status.INACTIVE);
         }
 
         userRepository.save(user);
+
+        // Automatically create Restaurant
+        if (user.getRole() == Role.RESTAURANT) {
+            Restaurant restaurant = new Restaurant();
+            Scanner sc = new Scanner(System.in);
+
+            if(user.getRole() == Role.RESTAURANT){
+                System.out.print("Mobile: ");
+                restaurant.setMobileNumber(sc.nextLine());
+
+                System.out.print("City: ");
+                restaurant.setCity(sc.nextLine());
+            }
+
+            restaurant.setId(IdGenerator.generateId(
+                    FileConstants.RESTAURANTS_FILE,
+                    IdConstants.RESTAURANT_ID_PREFIX)
+            );
+            restaurant.setName(user.getName());
+            restaurant.setOwnerId(user.getId());   // if your Restaurant has this field
+            restaurant.setStatus(Status.INACTIVE); // if Restaurant has a status field
+
+            restaurantRepository.save(restaurant);
+        }
     }
 
     public User login(String email, String password) {
@@ -70,17 +100,13 @@ public class UserService {
 
     public void approveUser(String userId) {
         User user = userRepository.findById(userId);
-
         user.setStatus(Status.ACTIVE);
-
         userRepository.update(user);
     }
 
     public void deactivateUser(String userId) {
         User user = userRepository.findById(userId);
-
         user.setStatus(Status.INACTIVE);
-
         userRepository.update(user);
     }
 

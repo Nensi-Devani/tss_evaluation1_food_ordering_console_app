@@ -15,6 +15,7 @@ public class MessageConstants {
     // Restaurant
     public static final String RESTAURANT_NOT_FOUND = "Restaurant not found.";
     public static final String RESTAURANT_INACTIVE = "Restaurant is inactive.";
+    public static final String RESTAURANT_ALREADY_EXISTS = "Restaurant already registered.";
 
     // Menu Item
     public static final String MENU_ITEM_NOT_FOUND = "Menu item not found.";

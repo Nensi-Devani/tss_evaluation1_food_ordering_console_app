@@ -3,19 +3,22 @@ package com.foodorder.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.enums.OrderLogAction;
+import com.foodorder.enums.PaymentStatus;
 import com.foodorder.enums.PaymentType;
 import com.foodorder.exception.CartNotFoundException;
 import com.foodorder.exception.DeliveryBoyNotAvailableException;
 import com.foodorder.exception.OrderNotFoundException;
 import com.foodorder.model.*;
 import com.foodorder.repository.*;
+import com.foodorder.state.CancelledState;
 import com.foodorder.state.OrderState;
 import com.foodorder.state.PlacedState;
 import com.foodorder.util.FileUtil;
+import com.foodorder.util.OTPGenerator;
 
 public class OrderService {
     private final OrderRepository orderRepository = new OrderRepository();
@@ -37,9 +40,7 @@ public class OrderService {
 
         for (CartItem cartItem : cartItems) {
             MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId());
-
-            double priceAfterDiscount = menuItem.getPrice() - (menuItem.getPrice() * menuItem.getDiscount() / 100);
-
+            double priceAfterDiscount = menuItem.getPrice()- (menuItem.getPrice() * menuItem.getDiscount() / 100);
             subtotal += priceAfterDiscount * cartItem.getQuantity();
         }
 
@@ -52,13 +53,58 @@ public class OrderService {
                 0,
                 deliveryCharge,
                 paymentType,
-                null // state set below
+                null
         );
 
         order.setOrderState(new PlacedState());
 
         orderRepository.save(order);
 
+        // Apply best discount
+        Discount discount = new DiscountService().getBestDiscount(subtotal);
+
+        double discountAmount = 0;
+
+        if (discount != null) {
+            discountAmount = subtotal * discount.getDiscountPercentage() / 100;
+            order.setDiscount(discountAmount);
+        }
+
+        // IMPORTANT: Update order after discount calculation
+        orderRepository.update(order);
+
+        // Create payment
+        Payment payment = new Payment(
+                order.getId(),
+                subtotal - discountAmount + deliveryCharge,
+                paymentType,
+                PaymentStatus.PENDING
+        );
+
+        new PaymentService().createPayment(payment);
+
+        // Generate OTP
+        String otp = OTPGenerator.generateOTP();
+
+        new OrderOTPRepository().save(
+                new OrderOTP(
+                        order.getId(),
+                        otp,
+                        LocalDateTime.now()
+                )
+        );
+
+        // Add Order Placed Log
+        new OrderLogService().addLog(
+                new OrderLog(
+                        order.getId(),
+                        OrderLogAction.ORDER_PLACED,
+                        customerId,
+                        LocalDateTime.now()
+                )
+        );
+
+        // Save Order Items
         for (CartItem cartItem : cartItems) {
             MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId());
 
@@ -72,6 +118,7 @@ public class OrderService {
             orderItemRepository.save(orderItem);
         }
 
+        // Clear Cart Items
         List<CartItem> allCartItems = cartItemRepository.findAll();
         allCartItems.removeIf(item -> item.getCartId().equals(cart.getId()));
 
@@ -134,4 +181,144 @@ public class OrderService {
 
         orderRepository.update(order);
     }
+
+    public void acceptOrder(String orderId, String restaurantOwnerId) {
+        Order order = orderRepository.findById(orderId);
+
+        order.getOrderState().next(order); // PLACED -> PREPARING
+
+        orderRepository.update(order);
+
+        new OrderLogService().addLog(
+                new OrderLog(
+                        orderId,
+                        OrderLogAction.ORDER_PREPARING,
+                        restaurantOwnerId,
+                        LocalDateTime.now()
+                )
+        );
+    }
+
+    public void markOrderReady(String orderId, String restaurantOwnerId) {
+        Order order = orderRepository.findById(orderId);
+
+        order.getOrderState().next(order); // PREPARING -> READY
+
+        orderRepository.update(order);
+
+        new OrderLogService().addLog(
+                new OrderLog(
+                        orderId,
+                        OrderLogAction.ORDER_READY,
+                        restaurantOwnerId,
+                        LocalDateTime.now()
+                )
+        );
+    }
+
+    public void markOutForDelivery(String orderId, String restaurantOwnerId) {
+        Order order = orderRepository.findById(orderId);
+        assignDeliveryBoy(orderId);
+
+        order = orderRepository.findById(orderId);
+
+        order.getOrderState().next(order); // READY -> OUT_FOR_DELIVERY
+
+        orderRepository.update(order);
+
+        OrderLogService logService = new OrderLogService();
+
+        logService.addLog(
+                new OrderLog(
+                        orderId,
+                        OrderLogAction.DELIVERY_BOY_ASSIGNED,
+                        order.getDeliveryBoyId(),
+                        LocalDateTime.now()
+                )
+        );
+
+        logService.addLog(
+                new OrderLog(
+                        orderId,
+                        OrderLogAction.ORDER_OUT_FOR_DELIVERY,
+                        restaurantOwnerId,
+                        LocalDateTime.now()
+                )
+        );
+    }
+
+    public void deliverOrder(String orderId, String enteredOtp, String deliveryBoyId) {
+        Order order = orderRepository.findById(orderId);
+        OrderOTP otp = new OrderOTPRepository().findByOrderId(orderId);
+
+        if (otp == null) {
+            throw new RuntimeException(MessageConstants.OTP_NOT_FOUND);
+        }
+
+        if (!otp.getOtp().equals(enteredOtp)) {
+            throw new RuntimeException(MessageConstants.OTP_MISMATCH);
+        }
+
+        order.getOrderState().next(order); // OUT_FOR_DELIVERY -> DELIVERED
+
+        orderRepository.update(order);
+
+        OrderLogService logService = new OrderLogService();
+
+        logService.addLog(
+                new OrderLog(
+                        orderId,
+                        OrderLogAction.OTP_VERIFIED,
+                        deliveryBoyId,
+                        LocalDateTime.now()
+                )
+        );
+
+        logService.addLog(
+                new OrderLog(
+                        orderId,
+                        OrderLogAction.ORDER_DELIVERED,
+                        deliveryBoyId,
+                        LocalDateTime.now()
+                )
+        );
+    }
+
+    public void cancelOrder(String orderId, String customerId) {
+        Order order = orderRepository.findById(orderId);
+        String status = order.getOrderState().getStatus();
+
+        if (status.equals("READY") || status.equals("OUT_FOR_DELIVERY") || status.equals("DELIVERED")) {
+            throw new RuntimeException(MessageConstants.ORDER_CANNOT_CANCEL);
+        }
+
+        order.setOrderState(new CancelledState());
+
+        orderRepository.update(order);
+
+        new OrderLogService().addLog(
+                new OrderLog(
+                        orderId,
+                        OrderLogAction.ORDER_CANCELLED,
+                        customerId,
+                        LocalDateTime.now()
+                )
+        );
+    }
+
+    public List<Order> getOrdersByCustomer(String customerId) {
+
+        List<Order> orders = orderRepository.findAll();
+
+        List<Order> result = new ArrayList<>();
+
+        for (Order order : orders) {
+
+            if (order.getCustomerId().equals(customerId))
+                result.add(order);
+        }
+
+        return result;
+    }
+
 }

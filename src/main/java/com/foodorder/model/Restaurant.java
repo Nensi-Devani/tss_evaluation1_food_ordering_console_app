@@ -17,6 +17,9 @@ public class Restaurant implements Serializable, Identifiable {
     private String pincode;
     private Status status;
 
+    public Restaurant(){
+    }
+
     public Restaurant(String ownerId, String name, String mobileNumber, String address, String city, String pincode, Status status) {
         this.ownerId = ownerId;
         this.name = name;

@@ -93,4 +93,15 @@ public class MenuItemRepository {
 
         return inactiveMenuItems;
     }
+
+    public MenuItem findByRestaurantIdAndName(String restaurantId, String name) {
+        List<MenuItem> menuItems = FileUtil.readData(FileConstants.MENU_ITEMS_FILE);
+
+        for (MenuItem menuItem : menuItems) {
+            if (menuItem.getRestaurantId().equals(restaurantId) && menuItem.getName().equalsIgnoreCase(name))
+                return menuItem;
+        }
+
+        return null;
+    }
 }

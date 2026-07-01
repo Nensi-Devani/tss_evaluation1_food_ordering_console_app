@@ -20,6 +20,7 @@ public class MessageConstants {
     // Menu Item
     public static final String MENU_ITEM_NOT_FOUND = "Menu item not found.";
     public static final String MENU_ITEM_INACTIVE = "Menu item is inactive.";
+    public static final String MENU_ITEM_ALREADY_EXISTS = "Menu item already exists.";
 
     // Cart
     public static final String CART_NOT_FOUND = "Cart not found.";

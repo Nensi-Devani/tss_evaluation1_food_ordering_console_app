@@ -34,6 +34,9 @@ public class MessageConstants {
     // Payment
     public static final String PAYMENT_FAILED = "Payment failed.";
 
+    // Discount
+    public static final String DISCOUNT_NOT_FOUND = "Discount not found.";
+
     // Delivery
     public static final String DELIVERY_BOY_NOT_AVAILABLE = "No delivery partner is available.";
     public static final String DELIVERY_BOY_CAPACITY_EXCEEDED = "Delivery partner has reached maximum order capacity.";

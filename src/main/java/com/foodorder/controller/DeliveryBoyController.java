@@ -10,22 +10,14 @@ import com.foodorder.service.AuthenticationService;
 import com.foodorder.service.OrderService;
 
 public class DeliveryBoyController {
-
     private final Scanner sc = new Scanner(System.in);
 
-    private final OrderRepository orderRepository =
-            new OrderRepository();
-
-    private final OrderService orderService =
-            new OrderService();
-
-    private final AuthenticationService authService =
-            new AuthenticationService();
+    private final OrderRepository orderRepository = new OrderRepository();
+    private final OrderService orderService = new OrderService();
+    private final AuthenticationService authService = new AuthenticationService();
 
     public void menu(User deliveryBoy) {
-
         while (true) {
-
             System.out.println("\n==============================");
             System.out.println(" DELIVERY BOY DASHBOARD");
             System.out.println("==============================");
@@ -39,7 +31,6 @@ public class DeliveryBoyController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     dashboard(deliveryBoy);
                     break;
@@ -62,18 +53,13 @@ public class DeliveryBoyController {
         }
     }
 
-    /*------------------------------------------------------*/
-
     private void dashboard(User deliveryBoy) {
-
-        List<Order> orders =
-                orderRepository.findByDeliveryBoyId(deliveryBoy.getId());
+        List<Order> orders = orderRepository.findByDeliveryBoyId(deliveryBoy.getId());
 
         int assigned = 0;
         int delivered = 0;
 
         for (Order order : orders) {
-
             if (order.getOrderState().getStatus().equals("DELIVERED")) {
                 delivered++;
             } else {
@@ -87,15 +73,10 @@ public class DeliveryBoyController {
         System.out.println("Delivered Orders : " + delivered);
     }
 
-    /*------------------------------------------------------*/
-
     private void assignedOrders(User deliveryBoy) {
-
-        List<Order> orders =
-                orderRepository.findByDeliveryBoyId(deliveryBoy.getId());
+        List<Order> orders = orderRepository.findByDeliveryBoyId(deliveryBoy.getId());
 
         if (orders.isEmpty()) {
-
             System.out.println("No Assigned Orders.");
             return;
         }
@@ -105,7 +86,6 @@ public class DeliveryBoyController {
         boolean found = false;
 
         for (Order order : orders) {
-
             if (order.getOrderState().getStatus().equals("DELIVERED"))
                 continue;
 
@@ -124,7 +104,6 @@ public class DeliveryBoyController {
         }
 
         if (!found) {
-
             System.out.println("No Pending Orders.");
             return;
         }
@@ -140,13 +119,8 @@ public class DeliveryBoyController {
         }
     }
 
-/*------------------------------------------------------*/
-    /*------------------------------------------------------*/
-
     private void verifyOTP(User deliveryBoy) {
-
         try {
-
             System.out.print("Enter Order Id : ");
             String orderId = sc.nextLine();
 
@@ -160,28 +134,20 @@ public class DeliveryBoyController {
             );
 
             System.out.println("\nOrder Delivered Successfully.");
-
         } catch (Exception e) {
-
             System.out.println(e.getMessage());
         }
     }
 
-    /*------------------------------------------------------*/
-
     private void todayDeliveries(User deliveryBoy) {
-
-        List<Order> orders =
-                orderRepository.findByDeliveryBoyId(deliveryBoy.getId());
+        List<Order> orders = orderRepository.findByDeliveryBoyId(deliveryBoy.getId());
 
         int delivered = 0;
 
         System.out.println("\n========== TODAY'S DELIVERIES ==========");
 
         for (Order order : orders) {
-
             if (order.getOrderState().getStatus().equals("DELIVERED")) {
-
                 delivered++;
 
                 System.out.println("--------------------------------");
@@ -197,18 +163,12 @@ public class DeliveryBoyController {
         }
 
         if (delivered == 0) {
-
             System.out.println("No Deliveries Today.");
         }
     }
 
-/*------------------------------------------------------*/
-    /*------------------------------------------------------*/
-
     private void logout() {
-
         authService.logout();
-
         new LoginController().start();
     }
 }

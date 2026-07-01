@@ -51,29 +51,21 @@ public class RestaurantService {
 
     public void approveRestaurant(String restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId);
-
         restaurant.setStatus(Status.ACTIVE);
-
         restaurantRepository.update(restaurant);
 
         User owner = userRepository.findById(restaurant.getOwnerId());
-
         owner.setStatus(Status.ACTIVE);
-
         userRepository.update(owner);
     }
 
     public void deactivateRestaurant(String restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId);
-
         restaurant.setStatus(Status.INACTIVE);
-
         restaurantRepository.update(restaurant);
 
         User owner = userRepository.findById(restaurant.getOwnerId());
-
         owner.setStatus(Status.INACTIVE);
-
         userRepository.update(owner);
     }
 

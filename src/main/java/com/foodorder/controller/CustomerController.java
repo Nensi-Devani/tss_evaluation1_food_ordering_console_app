@@ -22,13 +22,12 @@ import com.foodorder.service.PaymentService;
 import com.foodorder.service.RestaurantService;
 
 public class CustomerController {
-
     private final Scanner sc = new Scanner(System.in);
 
     // Services
     private final AuthenticationService authenticationService = new AuthenticationService();
-    private final RestaurantService restaurantService = new RestaurantService();
-    private final MenuItemService menuItemService = new MenuItemService();
+//    private final RestaurantService restaurantService = new RestaurantService();
+//    private final MenuItemService menuItemService = new MenuItemService();
     private final CartService cartService = new CartService();
     private final OrderService orderService = new OrderService();
     private final PaymentService paymentService = new PaymentService();
@@ -38,14 +37,12 @@ public class CustomerController {
     private final RestaurantRepository restaurantRepository = new RestaurantRepository();
     private final MenuItemRepository menuItemRepository = new MenuItemRepository();
     private final CartRepository cartRepository = new CartRepository();
-    private final CartItemRepository cartItemRepository = new CartItemRepository();
-    private final OrderRepository orderRepository = new OrderRepository();
-    private final OrderLogRepository orderLogRepository = new OrderLogRepository();
+//    private final CartItemRepository cartItemRepository = new CartItemRepository();
+//    private final OrderRepository orderRepository = new OrderRepository();
+//    private final OrderLogRepository orderLogRepository = new OrderLogRepository();
 
     public void menu(User customer) {
-
         while (true) {
-
             System.out.println("\n==================================");
             System.out.println("        CUSTOMER DASHBOARD");
             System.out.println("==================================");
@@ -59,7 +56,6 @@ public class CustomerController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     viewRestaurants();
                     break;
@@ -87,7 +83,6 @@ public class CustomerController {
     }
 
     private void viewRestaurants() {
-
         List<Restaurant> restaurants = restaurantRepository.findAllActive();
 
         if (restaurants.isEmpty()) {
@@ -98,7 +93,6 @@ public class CustomerController {
         System.out.println("\n========== RESTAURANTS ==========");
 
         for (Restaurant restaurant : restaurants) {
-
             System.out.println("----------------------------------");
             System.out.println("Restaurant Id : " + restaurant.getId());
             System.out.println("Name          : " + restaurant.getName());
@@ -108,12 +102,10 @@ public class CustomerController {
     }
 
     private void viewRestaurantMenu(User customer) {
-
         System.out.print("Enter Restaurant Id : ");
         String restaurantId = sc.nextLine();
 
-        List<MenuItem> menuItems =
-                menuItemRepository.findByRestaurantId(restaurantId);
+        List<MenuItem> menuItems = menuItemRepository.findByRestaurantId(restaurantId);
 
         if (menuItems.isEmpty()) {
             System.out.println("No Menu Items Found.");
@@ -123,10 +115,8 @@ public class CustomerController {
         System.out.println("\n============== MENU ==============");
 
         for (MenuItem item : menuItems) {
-
             if (item.getStatus() != Status.ACTIVE)
                 continue;
-
             System.out.println("----------------------------------");
             System.out.println("Id         : " + item.getId());
             System.out.println("Name       : " + item.getName());
@@ -147,18 +137,14 @@ public class CustomerController {
     }
 
     private void addToCart(User customer, String restaurantId) {
-
         Cart cart = cartRepository.findByCustomerId(customer.getId());
 
         if (cart == null) {
-
             cart = new Cart(customer.getId(), restaurantId);
-
             cartService.createCart(cart);
-
             cart = cartRepository.findByCustomerId(customer.getId());
-        } else if (!cart.getRestaurantId().equals(restaurantId)) {
-
+        }
+        else if (!cart.getRestaurantId().equals(restaurantId)) {
             System.out.println("You already have items from another restaurant.");
             System.out.println("Please place that order first.");
 
@@ -183,9 +169,7 @@ public class CustomerController {
     }
 
     private void cartMenu(User customer) {
-
         while (true) {
-
             System.out.println("\n========== CART ==========");
             System.out.println("1. View Cart");
             System.out.println("2. Remove Item");
@@ -196,7 +180,6 @@ public class CustomerController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     viewCart(customer);
                     break;
@@ -219,15 +202,12 @@ public class CustomerController {
     }
 
     private void viewCart(User customer) {
-
         try {
-
             Cart cart = cartService.getCart(customer.getId());
 
             List<CartItem> cartItems = cartService.getCartItems(cart.getId());
 
             if (cartItems.isEmpty()) {
-
                 System.out.println("Cart is Empty.");
                 return;
             }
@@ -237,14 +217,9 @@ public class CustomerController {
             System.out.println("\n========== CART ==========");
 
             for (CartItem cartItem : cartItems) {
+                MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId());
 
-                MenuItem menuItem =
-                        menuItemRepository.findById(cartItem.getMenuItemId());
-
-                double price =
-                        menuItem.getPrice()
-                                - (menuItem.getPrice() * menuItem.getDiscount() / 100);
-
+                double price = menuItem.getPrice() - (menuItem.getPrice() * menuItem.getDiscount() / 100);
                 double amount = price * cartItem.getQuantity();
 
                 total += amount;
@@ -259,21 +234,16 @@ public class CustomerController {
 
             System.out.println("--------------------------------");
             System.out.println("Cart Total : " + total);
-
         } catch (Exception e) {
-
             System.out.println(e.getMessage());
         }
     }
 
     private void removeCartItem(User customer) {
-
         try {
-
             viewCart(customer);
 
             System.out.print("\nEnter Cart Item Id : ");
-
             String cartItemId = sc.nextLine();
 
             cartService.removeItem(cartItemId);
@@ -281,21 +251,16 @@ public class CustomerController {
             System.out.println("Item Removed Successfully.");
 
         } catch (Exception e) {
-
             System.out.println(e.getMessage());
         }
     }
 
     private void checkout(User customer) {
-
         try {
-
             Cart cart = cartService.getCart(customer.getId());
-
             List<CartItem> cartItems = cartService.getCartItems(cart.getId());
 
             if (cartItems.isEmpty()) {
-
                 System.out.println("Cart is Empty.");
                 return;
             }
@@ -310,7 +275,6 @@ public class CustomerController {
             PaymentType paymentType;
 
             switch (choice) {
-
                 case 1:
                     paymentType = PaymentType.CASH;
                     break;
@@ -330,11 +294,9 @@ public class CustomerController {
                     40
             );
 
-            Payment payment =
-                    paymentService.getPaymentByOrderId(order.getId());
+            Payment payment = paymentService.getPaymentByOrderId(order.getId());
 
-            PaymentFactory
-                    .getPaymentStrategy(paymentType)
+            PaymentFactory.getPaymentStrategy(paymentType)
                     .pay(payment);
 
             paymentService.updatePaymentStatus(
@@ -354,30 +316,20 @@ public class CustomerController {
                                     + order.getDeliveryCharge())
             );
 
-            System.out.println("Payment : "
-                    + payment.getPaymentStatus());
+            System.out.println("Payment : " + payment.getPaymentStatus());
 
-            if (paymentType == PaymentType.CASH) {
-
+            if (paymentType == PaymentType.CASH)
                 System.out.println("Cash will be collected at delivery.");
-
-            } else {
-
+            else
                 System.out.println("UPI Payment Successful.");
-            }
 
         } catch (Exception e) {
-
             System.out.println(e.getMessage());
         }
     }
 
-    /*------------------------------------------------------*/
-
     private void myOrders(User customer) {
-
         while (true) {
-
             System.out.println("\n------ MY ORDERS ------");
             System.out.println("1. View Orders");
             System.out.println("2. Cancel Order");
@@ -387,7 +339,6 @@ public class CustomerController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     viewOrders(customer);
                     break;
@@ -409,21 +360,15 @@ public class CustomerController {
         }
     }
 
-    /*------------------------------------------------------*/
-
     private void viewOrders(User customer) {
-
-        List<Order> orders =
-                new OrderRepository().findByCustomerId(customer.getId());
+        List<Order> orders = new OrderRepository().findByCustomerId(customer.getId());
 
         if (orders.isEmpty()) {
-
             System.out.println("No Orders Found.");
             return;
         }
 
         for (Order order : orders) {
-
             System.out.println("--------------------------------");
             System.out.println("Order Id : " + order.getId());
             System.out.println("Restaurant : " + order.getRestaurantId());
@@ -438,52 +383,34 @@ public class CustomerController {
 
             System.out.println("Payment : " + order.getPaymentType());
 
-            System.out.println("Status : " +
-                    order.getOrderState().getStatus());
+            System.out.println("Status : " + order.getOrderState().getStatus());
         }
     }
 
-    /*------------------------------------------------------*/
-
     private void cancelOrder(User customer) {
-
         viewOrders(customer);
 
         System.out.print("\nEnter Order Id : ");
-
         String orderId = sc.nextLine();
 
         try {
-
-            orderService.cancelOrder(
-                    orderId,
-                    customer.getId()
-            );
-
+            orderService.cancelOrder(orderId, customer.getId());
             System.out.println("Order Cancelled Successfully.");
-
         } catch (Exception e) {
-
             System.out.println(e.getMessage());
         }
 
     }
 
-    /*------------------------------------------------------*/
-
     private void trackOrder(User customer) {
-
         viewOrders(customer);
 
         System.out.print("\nEnter Order Id : ");
-
         String orderId = sc.nextLine();
 
-        List<OrderLog> logs =
-                new OrderLogRepository().findByOrderId(orderId);
+        List<OrderLog> logs = new OrderLogRepository().findByOrderId(orderId);
 
         if (logs.isEmpty()) {
-
             System.out.println("No Tracking Available.");
             return;
         }
@@ -491,24 +418,16 @@ public class CustomerController {
         System.out.println();
 
         for (OrderLog log : logs) {
-
             System.out.println("--------------------------------");
             System.out.println(log.getActionDateTime());
             System.out.println(log.getAction());
             System.out.println("By : " + log.getActionBy());
-
         }
-
     }
 
     private void logout() {
-
         authenticationService.logout();
-
         System.out.println("Logged Out Successfully.");
-
     }
 
 }
-
-/*------------------------------------------------------*/

@@ -3,6 +3,7 @@ package com.foodorder.controller;
 import java.util.Scanner;
 
 import com.foodorder.enums.Role;
+import com.foodorder.exception.ApplicationException;
 import com.foodorder.model.User;
 import com.foodorder.service.AuthenticationService;
 
@@ -22,35 +23,44 @@ public class LoginController {
     }
 
     private void login() {
-        System.out.print("Email: ");
-        String email = sc.nextLine();
+        try {
+            System.out.print("Email: ");
+            String email = sc.nextLine();
 
-        System.out.print("Password: ");
-        String password = sc.nextLine();
+            System.out.print("Password: ");
+            String password = sc.nextLine();
 
-        User user = authService.login(email, password);
+            User user = authService.login(email, password);
 
-        routeByRole(user);
+            routeByRole(user);
+        }catch (ApplicationException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private void register() {
-        User user = new User();
+        try {
+            User user = new User();
 
-        System.out.print("Name: ");
-        user.setName(sc.nextLine());
+            System.out.print("Name: ");
+            user.setName(sc.nextLine());
 
-        System.out.print("Email: ");
-        user.setEmail(sc.nextLine());
+            System.out.print("Email: ");
+            user.setEmail(sc.nextLine());
 
-        System.out.print("Password: ");
-        user.setPassword(sc.nextLine());
+            System.out.print("Password: ");
+            user.setPassword(sc.nextLine());
 
-        System.out.print("Role (CUSTOMER/RESTAURANT/DELIVERY_BOY): ");
-        user.setRole(Role.valueOf(sc.nextLine()));
+            System.out.print("Role (CUSTOMER/RESTAURANT/DELIVERY_BOY): ");
+            user.setRole(Role.valueOf(sc.nextLine()));
 
-        authService.register(user);
+            authService.register(user);
 
-        System.out.println("Registered successfully!");
+            System.out.println("Registered successfully!");
+        }
+        catch (ApplicationException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private void routeByRole(User user) {

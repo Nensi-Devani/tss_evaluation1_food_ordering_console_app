@@ -10,7 +10,6 @@ import com.foodorder.repository.*;
 import com.foodorder.service.*;
 
 public class AdminController {
-
     private final Scanner sc = new Scanner(System.in);
 
     private final UserService userService = new UserService();
@@ -20,9 +19,7 @@ public class AdminController {
     private final OrderService orderService = new OrderService();
 
     public void menu(User admin) {
-
         while (true) {
-
             System.out.println("\n==============================");
             System.out.println("        ADMIN DASHBOARD");
             System.out.println("==============================");
@@ -37,7 +34,6 @@ public class AdminController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     manageUsers();
                     break;
@@ -65,15 +61,10 @@ public class AdminController {
                     System.out.println("Invalid Choice");
             }
         }
-
     }
 
-    /*----------------------------------------------------*/
-
     private void manageUsers() {
-
         while (true) {
-
             System.out.println("\n------ USER MANAGEMENT ------");
             System.out.println("1. Add User");
             System.out.println("2. View Users");
@@ -85,7 +76,6 @@ public class AdminController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     addUser();
                     break;
@@ -109,13 +99,10 @@ public class AdminController {
                 case 0:
                     return;
             }
-
         }
-
     }
 
     private void addUser() {
-
         System.out.print("Name : ");
         String name = sc.nextLine();
 
@@ -151,32 +138,25 @@ public class AdminController {
         userService.register(user);
 
         System.out.println("User Added Successfully.");
-
     }
 
     private void viewUsers() {
-
         List<User> users = new UserRepository().findAll();
 
         System.out.println();
 
         for (User user : users) {
-
             System.out.println("--------------------------------");
             System.out.println("ID      : " + user.getId());
             System.out.println("Name    : " + user.getName());
             System.out.println("Email   : " + user.getEmail());
             System.out.println("Role    : " + user.getRole());
             System.out.println("Status  : " + user.getStatus());
-
         }
-
     }
 
     private void activateUser() {
-
         System.out.print("Enter User Id : ");
-
         String id = sc.nextLine();
 
         User user = new UserRepository().findById(id);
@@ -186,13 +166,10 @@ public class AdminController {
         new UserRepository().update(user);
 
         System.out.println("User Activated.");
-
     }
 
     private void deactivateUser() {
-
         System.out.print("Enter User Id : ");
-
         String id = sc.nextLine();
 
         User user = new UserRepository().findById(id);
@@ -202,39 +179,27 @@ public class AdminController {
         new UserRepository().update(user);
 
         System.out.println("User Deactivated.");
-
     }
 
     private void updateUser() {
-
         System.out.print("Enter User Id : ");
-
         String id = sc.nextLine();
 
         User user = new UserRepository().findById(id);
 
         System.out.print("New Name : ");
-
         user.setName(sc.nextLine());
 
         System.out.print("New Email : ");
-
         user.setEmail(sc.nextLine());
 
         new UserRepository().update(user);
 
         System.out.println("User Updated.");
-
     }
 
-    /*----------------------------------------------------*/
-    /*                RESTAURANT MANAGEMENT                */
-    /*----------------------------------------------------*/
-
     private void manageRestaurants() {
-
         while (true) {
-
             System.out.println("\n------ RESTAURANT MANAGEMENT ------");
             System.out.println("1. View Restaurants");
             System.out.println("2. Approve Restaurant");
@@ -246,7 +211,6 @@ public class AdminController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     viewRestaurants();
                     break;
@@ -277,13 +241,11 @@ public class AdminController {
     }
 
     private void viewRestaurants() {
-
         List<Restaurant> restaurants = new RestaurantRepository().findAll();
 
         System.out.println();
 
         for (Restaurant restaurant : restaurants) {
-
             System.out.println("--------------------------------");
             System.out.println("ID        : " + restaurant.getId());
             System.out.println("Name      : " + restaurant.getName());
@@ -295,9 +257,7 @@ public class AdminController {
     }
 
     private void approveRestaurant() {
-
         System.out.print("Restaurant Id : ");
-
         String id = sc.nextLine();
 
         restaurantService.approveRestaurant(id);
@@ -306,9 +266,7 @@ public class AdminController {
     }
 
     private void activateRestaurant() {
-
         System.out.print("Restaurant Id : ");
-
         String id = sc.nextLine();
 
         Restaurant restaurant = new RestaurantRepository().findById(id);
@@ -321,9 +279,7 @@ public class AdminController {
     }
 
     private void deactivateRestaurant() {
-
         System.out.print("Restaurant Id : ");
-
         String id = sc.nextLine();
 
         Restaurant restaurant = new RestaurantRepository().findById(id);
@@ -335,23 +291,15 @@ public class AdminController {
         System.out.println("Restaurant Deactivated.");
     }
 
-    /*----------------------------------------------------*/
-    /*                MENU ITEM MANAGEMENT                */
-    /*----------------------------------------------------*/
-
     private void manageMenuItems() {
-
         System.out.print("Restaurant Id : ");
-
         String restaurantId = sc.nextLine();
 
-        List<MenuItem> menuItems =
-                new MenuItemRepository().findByRestaurantId(restaurantId);
+        List<MenuItem> menuItems = new MenuItemRepository().findByRestaurantId(restaurantId);
 
         System.out.println();
 
         for (MenuItem item : menuItems) {
-
             System.out.println("--------------------------------");
             System.out.println("Id         : " + item.getId());
             System.out.println("Name       : " + item.getName());
@@ -363,14 +311,8 @@ public class AdminController {
         }
     }
 
-    /*----------------------------------------------------*/
-    /*                DISCOUNT MANAGEMENT                 */
-    /*----------------------------------------------------*/
-
     private void manageDiscounts() {
-
         while (true) {
-
             System.out.println("\n------ DISCOUNT MANAGEMENT ------");
             System.out.println("1. Add Discount");
             System.out.println("2. View Discounts");
@@ -381,7 +323,6 @@ public class AdminController {
             int choice = Integer.parseInt(sc.nextLine());
 
             switch (choice) {
-
                 case 1:
                     addDiscount();
                     break;
@@ -405,20 +346,13 @@ public class AdminController {
     }
 
     private void addDiscount() {
-
         System.out.print("Minimum Amount : ");
-
         double min = Double.parseDouble(sc.nextLine());
 
         System.out.print("Discount Percentage : ");
-
         double percentage = Double.parseDouble(sc.nextLine());
 
-        Discount discount = new Discount(
-                min,
-                percentage,
-                Status.ACTIVE
-        );
+        Discount discount = new Discount(min, percentage, Status.ACTIVE);
 
         discountService.createDiscount(discount);
 
@@ -426,11 +360,9 @@ public class AdminController {
     }
 
     private void viewDiscounts() {
-
         List<Discount> discounts = discountService.getAllDiscounts();
 
         for (Discount discount : discounts) {
-
             System.out.println("--------------------------------");
             System.out.println("ID          : " + discount.getId());
             System.out.println("Minimum Amt : " + discount.getMinimumAmount());
@@ -440,9 +372,7 @@ public class AdminController {
     }
 
     private void activateDiscount() {
-
         System.out.print("Discount Id : ");
-
         String id = sc.nextLine();
 
         Discount discount = new DiscountRepository().findById(id);
@@ -455,9 +385,7 @@ public class AdminController {
     }
 
     private void deactivateDiscount() {
-
         System.out.print("Discount Id : ");
-
         String id = sc.nextLine();
 
         Discount discount = new DiscountRepository().findById(id);
@@ -469,12 +397,7 @@ public class AdminController {
         System.out.println("Discount Deactivated.");
     }
 
-    /*----------------------------------------------------*/
-    /*                    ORDER MANAGEMENT                */
-    /*----------------------------------------------------*/
-
     private void viewOrders() {
-
         List<Order> orders = new OrderRepository().findAll();
 
         if (orders.isEmpty()) {
@@ -485,7 +408,6 @@ public class AdminController {
         System.out.println("\n============= ORDERS =============");
 
         for (Order order : orders) {
-
             System.out.println("--------------------------------------------");
             System.out.println("Order Id        : " + order.getId());
             System.out.println("Customer Id     : " + order.getCustomerId());
@@ -499,37 +421,27 @@ public class AdminController {
             System.out.println("Status          : " + order.getOrderState().getStatus());
             System.out.println("Date            : " + order.getOrderDateTime());
         }
-
     }
 
-    /*----------------------------------------------------*/
-
     private void traceOrder() {
-
         System.out.print("\nEnter Order Id : ");
-
         String orderId = sc.nextLine();
 
-        List<OrderLog> logs =
-                new OrderLogRepository().findByOrderId(orderId);
+        List<OrderLog> logs = new OrderLogRepository().findByOrderId(orderId);
 
         if (logs.isEmpty()) {
-
             System.out.println("No Logs Found.");
-
             return;
         }
 
         System.out.println("\n============= ORDER TIMELINE =============");
 
         for (OrderLog log : logs) {
-
             System.out.println("-------------------------------------");
             System.out.println("Action     : " + log.getAction());
             System.out.println("Performed By : " + log.getActionBy());
             System.out.println("Date Time  : " + log.getActionDateTime());
         }
-
     }
 
 }

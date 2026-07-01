@@ -45,6 +45,9 @@ public class MessageConstants {
     public static final String OTP_NOT_FOUND = "OTP not found.";
     public static final String OTP_MISMATCH = "Invalid OTP.";
 
+    // OrderLog
+    public static final String ORDER_LOG_NOT_FOUND = "OrderLog not found.";
+
     // Validation
     public static final String INVALID_INPUT = "Invalid input.";
     public static final String REQUIRED_FIELDS_MISSING = "Required fields are missing.";

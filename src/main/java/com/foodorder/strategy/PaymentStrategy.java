@@ -1,4 +1,7 @@
 package com.foodorder.strategy;
 
-public class PaymentStrategy {
+import com.foodorder.model.Payment;
+
+public interface PaymentStrategy {
+    void pay(Payment payment);
 }

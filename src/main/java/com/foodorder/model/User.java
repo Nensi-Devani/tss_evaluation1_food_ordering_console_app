@@ -16,6 +16,9 @@ public class User implements Serializable, Identifiable {
     private Role role;
     private Status status;
 
+    public User(){
+    }
+
     public User(String name, String email, String password, Role role, Status status) {
         this.name = name;
         this.email = email;

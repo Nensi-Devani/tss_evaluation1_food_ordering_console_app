@@ -1,5 +1,6 @@
 package com.foodorder.service;
 
+import com.foodorder.controller.LoginController;
 import com.foodorder.model.User;
 
 public class AuthenticationService {
@@ -14,6 +15,7 @@ public class AuthenticationService {
     }
 
     public void logout() {
+        new LoginController().start();
         System.out.println("\nLogged out successfully.");
     }
 }

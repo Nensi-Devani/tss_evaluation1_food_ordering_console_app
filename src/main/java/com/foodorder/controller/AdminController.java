@@ -145,43 +145,65 @@ public class AdminController {
 
         System.out.println();
 
+        System.out.println("\n==============================================================================================================");
+        System.out.printf("%-5s %-10s %-25s %-30s %-18s %-12s%n",
+                "No",
+                "ID",
+                "Name",
+                "Email",
+                "Role",
+                "Status");
+        System.out.println("==============================================================================================================");
+
+        int no = 1;
+
         for (User user : users) {
-            System.out.println("--------------------------------");
-            System.out.println("ID      : " + user.getId());
-            System.out.println("Name    : " + user.getName());
-            System.out.println("Email   : " + user.getEmail());
-            System.out.println("Role    : " + user.getRole());
-            System.out.println("Status  : " + user.getStatus());
+            System.out.printf("%-5d %-10s %-25s %-30s %-18s %-12s%n",
+                    no++,
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getRole(),
+                    user.getStatus());
         }
+
+        System.out.println("==============================================================================================================");
     }
 
     private void activateUser() {
+        viewUsers();
         System.out.print("Enter User Id : ");
         String id = sc.nextLine();
 
         User user = new UserRepository().findById(id);
 
-        user.setStatus(Status.ACTIVE);
-
-        new UserRepository().update(user);
-
-        System.out.println("User Activated.");
+        if(user.getStatus() == Status.INACTIVE) {
+            user.setStatus(Status.ACTIVE);
+            new UserRepository().update(user);
+            System.out.println("User Activated.");
+        }
+        else
+            System.out.println("User is already Activated.");
     }
 
     private void deactivateUser() {
+        viewUsers();
         System.out.print("Enter User Id : ");
         String id = sc.nextLine();
 
         User user = new UserRepository().findById(id);
 
-        user.setStatus(Status.INACTIVE);
-
-        new UserRepository().update(user);
-
-        System.out.println("User Deactivated.");
+        if(user.getStatus() == Status.ACTIVE) {
+            user.setStatus(Status.INACTIVE);
+            new UserRepository().update(user);
+            System.out.println("User Deactivated.");
+        }
+        else
+            System.out.println("User already Deactivated");
     }
 
     private void updateUser() {
+        viewUsers();
         System.out.print("Enter User Id : ");
         String id = sc.nextLine();
 
@@ -205,7 +227,7 @@ public class AdminController {
             System.out.println("2. Approve Restaurant");
             System.out.println("3. Activate Restaurant");
             System.out.println("4. Deactivate Restaurant");
-            System.out.println("5. Manage Menu Items");
+            System.out.println("5. View Menu Items");
             System.out.println("0. Back");
 
             int choice = Integer.parseInt(sc.nextLine());
@@ -245,15 +267,31 @@ public class AdminController {
 
         System.out.println();
 
+        System.out.println("\n==============================================================================================================================");
+        System.out.printf("%-5s %-10s %-25s %-12s %-15s %-18s %-12s%n",
+                "No",
+                "ID",
+                "Restaurant",
+                "Owner ID",
+                "Mobile",
+                "City",
+                "Status");
+        System.out.println("==============================================================================================================================");
+
+        int no = 1;
+
         for (Restaurant restaurant : restaurants) {
-            System.out.println("--------------------------------");
-            System.out.println("ID        : " + restaurant.getId());
-            System.out.println("Name      : " + restaurant.getName());
-            System.out.println("Owner Id  : " + restaurant.getOwnerId());
-            System.out.println("Mobile    : " + restaurant.getMobileNumber());
-            System.out.println("City      : " + restaurant.getCity());
-            System.out.println("Status    : " + restaurant.getStatus());
+            System.out.printf("%-5d %-10s %-25s %-12s %-15s %-18s %-12s%n",
+                    no++,
+                    restaurant.getId(),
+                    restaurant.getName(),
+                    restaurant.getOwnerId(),
+                    restaurant.getMobileNumber(),
+                    restaurant.getCity(),
+                    restaurant.getStatus());
         }
+
+        System.out.println("==============================================================================================================================");
     }
 
     private void approveRestaurant() {
@@ -271,11 +309,13 @@ public class AdminController {
 
         Restaurant restaurant = new RestaurantRepository().findById(id);
 
-        restaurant.setStatus(Status.ACTIVE);
-
-        new RestaurantRepository().update(restaurant);
-
-        System.out.println("Restaurant Activated.");
+        if(restaurant.getStatus() == Status.INACTIVE) {
+            restaurant.setStatus(Status.ACTIVE);
+            new RestaurantRepository().update(restaurant);
+            System.out.println("Restaurant Activated.");
+        }
+        else
+            System.out.println("Restaurant already Activated.");
     }
 
     private void deactivateRestaurant() {
@@ -284,11 +324,13 @@ public class AdminController {
 
         Restaurant restaurant = new RestaurantRepository().findById(id);
 
-        restaurant.setStatus(Status.INACTIVE);
-
-        new RestaurantRepository().update(restaurant);
-
-        System.out.println("Restaurant Deactivated.");
+        if(restaurant.getStatus() == Status.ACTIVE) {
+            restaurant.setStatus(Status.INACTIVE);
+            new RestaurantRepository().update(restaurant);
+            System.out.println("Restaurant Deactivated.");
+        }
+        else
+            System.out.println("Restaurant already Deactivated.");
     }
 
     private void manageMenuItems() {
@@ -299,16 +341,37 @@ public class AdminController {
 
         System.out.println();
 
+        System.out.println("\n============================================================================================================================");
+        System.out.printf("%-5s %-10s %-25s %-12s %-12s %-12s %-18s %-12s%n",
+                "No",
+                "ID",
+                "Name",
+                "Price",
+                "Discount",
+                "Final Price",
+                "Food Type",
+                "Status");
+        System.out.println("============================================================================================================================");
+
+        int no = 1;
+
         for (MenuItem item : menuItems) {
-            System.out.println("--------------------------------");
-            System.out.println("Id         : " + item.getId());
-            System.out.println("Name       : " + item.getName());
-            System.out.println("Price      : " + item.getPrice());
-            System.out.println("Discount   : " + item.getDiscount());
-            System.out.println("Food Type  : " + item.getFoodType());
-            System.out.println("Category   : " + item.getFoodCategory());
-            System.out.println("Status     : " + item.getStatus());
+
+            double finalPrice = item.getPrice()
+                    - (item.getPrice() * item.getDiscount() / 100);
+
+            System.out.printf("%-5d %-10s %-25s ₹%-11.2f %-11.2f%% ₹%-11.2f %-18s %-12s%n",
+                    no++,
+                    item.getId(),
+                    item.getName(),
+                    item.getPrice(),
+                    item.getDiscount(),
+                    finalPrice,
+                    item.getFoodType() + " (" + item.getFoodCategory() + ")",
+                    item.getStatus());
         }
+
+        System.out.println("============================================================================================================================");
     }
 
     private void manageDiscounts() {
@@ -362,26 +425,43 @@ public class AdminController {
     private void viewDiscounts() {
         List<Discount> discounts = discountService.getAllDiscounts();
 
+        System.out.println("\n==========================================================================================");
+        System.out.printf("%-5s %-10s %-20s %-15s %-12s%n",
+                "No",
+                "ID",
+                "Minimum Amount",
+                "Discount",
+                "Status");
+        System.out.println("==========================================================================================");
+
+        int no = 1;
+
         for (Discount discount : discounts) {
-            System.out.println("--------------------------------");
-            System.out.println("ID          : " + discount.getId());
-            System.out.println("Minimum Amt : " + discount.getMinimumAmount());
-            System.out.println("Discount %  : " + discount.getDiscountPercentage());
-            System.out.println("Status      : " + discount.getStatus());
+            System.out.printf("%-5d %-10s ₹%-19.2f %-14s %-12s%n",
+                    no++,
+                    discount.getId(),
+                    discount.getMinimumAmount(),
+                    String.format("%.2f%%", discount.getDiscountPercentage()),
+                    discount.getStatus());
         }
+
+        System.out.println("==========================================================================================");
     }
 
     private void activateDiscount() {
+        viewDiscounts();
         System.out.print("Discount Id : ");
         String id = sc.nextLine();
 
         Discount discount = new DiscountRepository().findById(id);
 
-        discount.setStatus(Status.ACTIVE);
-
-        new DiscountRepository().update(discount);
-
-        System.out.println("Discount Activated.");
+        if(discount.getStatus() == Status.INACTIVE) {
+            discount.setStatus(Status.ACTIVE);
+            new DiscountRepository().update(discount);
+            System.out.println("Discount Activated.");
+        }
+        else
+            System.out.println("Discount already Activated.");
     }
 
     private void deactivateDiscount() {
@@ -390,11 +470,13 @@ public class AdminController {
 
         Discount discount = new DiscountRepository().findById(id);
 
-        discount.setStatus(Status.INACTIVE);
-
-        new DiscountRepository().update(discount);
-
-        System.out.println("Discount Deactivated.");
+        if(discount.getStatus() == Status.ACTIVE) {
+            discount.setStatus(Status.INACTIVE);
+            new DiscountRepository().update(discount);
+            System.out.println("Discount Deactivated.");
+        }
+        else
+            System.out.println("Discount already Deactivated.");
     }
 
     private void viewOrders() {
@@ -405,25 +487,47 @@ public class AdminController {
             return;
         }
 
-        System.out.println("\n============= ORDERS =============");
+        System.out.println("\n==========================================================================================================================================================================");
+        System.out.printf("%-5s %-10s %-12s %-12s %-15s %-12s %-12s %-12s %-12s %-20s %-22s%n",
+                "No",
+                "Order ID",
+                "Customer",
+                "Restaurant",
+                "Delivery Boy",
+                "Subtotal",
+                "Discount",
+                "Delivery",
+                "Total",
+                "Payment",
+                "Status");
+        System.out.println("==========================================================================================================================================================================");
+
+        int no = 1;
 
         for (Order order : orders) {
-            System.out.println("--------------------------------------------");
-            System.out.println("Order Id        : " + order.getId());
-            System.out.println("Customer Id     : " + order.getCustomerId());
-            System.out.println("Restaurant Id   : " + order.getRestaurantId());
-            System.out.println("Delivery Boy Id : "
-                    + (order.getDeliveryBoyId() == null ? "Not Assigned" : order.getDeliveryBoyId()));
-            System.out.println("Subtotal        : " + order.getSubtotal());
-            System.out.println("Discount        : " + order.getDiscount());
-            System.out.println("Delivery Charge : " + order.getDeliveryCharge());
-            System.out.println("Payment Type    : " + order.getPaymentType());
-            System.out.println("Status          : " + order.getOrderState().getStatus());
-            System.out.println("Date            : " + order.getOrderDateTime());
+
+            double discountAmount = order.getSubtotal() * order.getDiscount() / 100;
+            double total = order.getSubtotal() - discountAmount + order.getDeliveryCharge();
+
+            System.out.printf("%-5d %-10s %-12s %-12s %-15s ₹%-11.2f %-11.2f%% ₹%-11.2f ₹%-11.2f %-20s %-22s%n",
+                    no++,
+                    order.getId(),
+                    order.getCustomerId(),
+                    order.getRestaurantId(),
+                    order.getDeliveryBoyId() == null ? "Not Assigned" : order.getDeliveryBoyId(),
+                    order.getSubtotal(),
+                    order.getDiscount(),
+                    order.getDeliveryCharge(),
+                    total,
+                    order.getPaymentType(),
+                    order.getOrderState().getStatus());
         }
+
+        System.out.println("==========================================================================================================================================================================");
     }
 
     private void traceOrder() {
+        viewOrders();
         System.out.print("\nEnter Order Id : ");
         String orderId = sc.nextLine();
 
@@ -434,14 +538,26 @@ public class AdminController {
             return;
         }
 
-        System.out.println("\n============= ORDER TIMELINE =============");
+        System.out.println("\n========================================================================================================");
+        System.out.printf("%-5s %-30s %-20s %-25s%n",
+                "No",
+                "Action",
+                "Performed By",
+                "Date & Time");
+        System.out.println("========================================================================================================");
+
+        int no = 1;
 
         for (OrderLog log : logs) {
-            System.out.println("-------------------------------------");
-            System.out.println("Action     : " + log.getAction());
-            System.out.println("Performed By : " + log.getActionBy());
-            System.out.println("Date Time  : " + log.getActionDateTime());
+
+            System.out.printf("%-5d %-30s %-20s %-25s%n",
+                    no++,
+                    log.getAction(),
+                    log.getActionBy(),
+                    log.getActionDateTime());
         }
+
+        System.out.println("========================================================================================================");
     }
 
 }

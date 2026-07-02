@@ -121,20 +121,32 @@ public class RestaurantController {
 
         System.out.println();
 
+        System.out.println("\n======================================================================================================");
+        System.out.printf("%-5s %-12s %-15s %-12s %-18s%n",
+                "No",
+                "Order ID",
+                "Customer ID",
+                "Amount",
+                "Status");
+        System.out.println("======================================================================================================");
+
+        int no = 1;
+
         for (Order order : orders) {
             if (!order.getRestaurantId().equals(restaurant.getId()))
                 continue;
 
-            System.out.println("----------------------------------");
-            System.out.println("Order Id : " + order.getId());
-            System.out.println("Customer : " + order.getCustomerId());
-            System.out.println("Amount : "
-                    + (order.getSubtotal()
-                    - order.getDiscount()
-                    + order.getDeliveryCharge()));
-            System.out.println("Status : "
-                    + order.getOrderState().getStatus());
+            double total = order.getSubtotal() - order.getDiscount() + order.getDeliveryCharge();
+
+            System.out.printf("%-5d %-12s %-15s ₹%-11.2f %-18s%n",
+                    no++,
+                    order.getId(),
+                    order.getCustomerId(),
+                    total,
+                    order.getOrderState().getStatus());
         }
+
+        System.out.println("======================================================================================================");
     }
 
     private void acceptOrder(User user) {
@@ -218,16 +230,33 @@ public class RestaurantController {
             return;
         }
 
+        System.out.println("\n==================================================================================================================================");
+        System.out.printf("%-5s %-10s %-25s %-12s %-12s %-12s %-18s %-12s%n",
+                "No",
+                "ID",
+                "Name",
+                "Price",
+                "Discount",
+                "Type",
+                "Category",
+                "Status");
+        System.out.println("==================================================================================================================================");
+
+        int no = 1;
+
         for (MenuItem item : items) {
-            System.out.println("--------------------------------");
-            System.out.println("Id        : " + item.getId());
-            System.out.println("Name      : " + item.getName());
-            System.out.println("Price     : " + item.getPrice());
-            System.out.println("Discount  : " + item.getDiscount());
-            System.out.println("Food Type : " + item.getFoodType());
-            System.out.println("Category  : " + item.getFoodCategory());
-            System.out.println("Status    : " + item.getStatus());
+            System.out.printf("%-5d %-10s %-25s ₹%-11.2f %-12s %-12s %-18s %-12s%n",
+                    no++,
+                    item.getId(),
+                    item.getName(),
+                    item.getPrice(),
+                    String.format("%.2f%%", item.getDiscount()),
+                    item.getFoodType(),
+                    item.getFoodCategory(),
+                    item.getStatus());
         }
+
+        System.out.println("==================================================================================================================================");
     }
 
     private void addMenuItem(User user) {

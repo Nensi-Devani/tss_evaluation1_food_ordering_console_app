@@ -7,12 +7,7 @@ import com.foodorder.enums.PaymentType;
 import com.foodorder.enums.Status;
 import com.foodorder.factory.PaymentFactory;
 import com.foodorder.model.*;
-import com.foodorder.repository.CartItemRepository;
-import com.foodorder.repository.CartRepository;
-import com.foodorder.repository.MenuItemRepository;
-import com.foodorder.repository.OrderLogRepository;
-import com.foodorder.repository.OrderRepository;
-import com.foodorder.repository.RestaurantRepository;
+import com.foodorder.repository.*;
 import com.foodorder.service.AuthenticationService;
 import com.foodorder.service.CartService;
 import com.foodorder.service.MenuItemService;
@@ -90,15 +85,24 @@ public class CustomerController {
             return;
         }
 
-        System.out.println("\n========== RESTAURANTS ==========");
+        System.out.println("\n======================================================================================================");
+        System.out.printf("%-5s %-12s %-30s %-20s %-15s%n", "No", "ID", "Restaurant Name", "City", "Mobile");
+        System.out.println("======================================================================================================");
+
+        int no = 1;
 
         for (Restaurant restaurant : restaurants) {
-            System.out.println("----------------------------------");
-            System.out.println("Restaurant Id : " + restaurant.getId());
-            System.out.println("Name          : " + restaurant.getName());
-            System.out.println("City          : " + restaurant.getCity());
-            System.out.println("Mobile        : " + restaurant.getMobileNumber());
+            if (restaurant.getStatus() != Status.ACTIVE)
+                continue;
+            System.out.printf("%-5d %-12s %-30s %-20s %-15s%n",
+                    no++,
+                    restaurant.getId(),
+                    restaurant.getName(),
+                    restaurant.getCity(),
+                    restaurant.getMobileNumber());
         }
+
+        System.out.println("======================================================================================================");
     }
 
     private void viewRestaurantMenu(User customer) {
@@ -112,19 +116,34 @@ public class CustomerController {
             return;
         }
 
-        System.out.println("\n============== MENU ==============");
+        System.out.println("\n==============================================================================================================================");
+        System.out.printf("%-5s %-10s %-25s %-10s %-10s %-12s %-18s%n",
+                "No",
+                "ID",
+                "Name",
+                "Price",
+                "Discount",
+                "Type",
+                "Category");
+        System.out.println("==============================================================================================================================");
+
+        int no = 1;
 
         for (MenuItem item : menuItems) {
             if (item.getStatus() != Status.ACTIVE)
                 continue;
-            System.out.println("----------------------------------");
-            System.out.println("Id         : " + item.getId());
-            System.out.println("Name       : " + item.getName());
-            System.out.println("Price      : ₹" + item.getPrice());
-            System.out.println("Discount   : " + item.getDiscount() + "%");
-            System.out.println("Food Type  : " + item.getFoodType());
-            System.out.println("Category   : " + item.getFoodCategory());
+
+            System.out.printf("%-5d %-10s %-25s ₹%-10.2f %-12s %-12s %-18s%n",
+                    no++,
+                    item.getId(),
+                    item.getName(),
+                    item.getPrice(),
+                    item.getDiscount() + "%",
+                    item.getFoodType(),
+                    item.getFoodCategory());
         }
+
+        System.out.println("==============================================================================================================================");
 
         System.out.println("\n1. Add To Cart");
         System.out.println("0. Back");
@@ -214,26 +233,49 @@ public class CustomerController {
 
             double total = 0;
 
-            System.out.println("\n========== CART ==========");
+            System.out.println("\n========================================================================================================================================");
+            System.out.printf("%-5s %-10s %-25s %-12s %-10s %-12s %-12s %-12s%n",
+                    "No",
+                    "Cart ID",
+                    "Food Name",
+                    "Price",
+                    "Qty",
+                    "Discount",
+                    "Amount",
+                    "Status");
+            System.out.println("========================================================================================================================================");
+
+            int no = 1;
 
             for (CartItem cartItem : cartItems) {
                 MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId());
 
-                double price = menuItem.getPrice() - (menuItem.getPrice() * menuItem.getDiscount() / 100);
-                double amount = price * cartItem.getQuantity();
+                double actualPrice = menuItem.getPrice();
+                double discount = menuItem.getDiscount();
+
+                double priceAfterDiscount =
+                        actualPrice - (actualPrice * discount / 100);
+
+                double amount =
+                        priceAfterDiscount * cartItem.getQuantity();
 
                 total += amount;
 
-                System.out.println("--------------------------------");
-                System.out.println("Cart Item Id : " + cartItem.getId());
-                System.out.println("Food         : " + menuItem.getName());
-                System.out.println("Price        : " + price);
-                System.out.println("Quantity     : " + cartItem.getQuantity());
-                System.out.println("Amount       : " + amount);
+                System.out.printf("%-5d %-10s %-25s ₹%-11.2f %-10d %-12s ₹%-11.2f %-12s%n",
+                        no++,
+                        cartItem.getId(),
+                        menuItem.getName(),
+                        priceAfterDiscount,
+                        cartItem.getQuantity(),
+                        String.format("%.2f%%", discount),
+                        amount,
+                        menuItem.getStatus());
             }
 
-            System.out.println("--------------------------------");
-            System.out.println("Cart Total : " + total);
+            System.out.println("========================================================================================================================================");
+            System.out.printf("%97s ₹%.2f%n", "Grand Total :", total);
+            System.out.println("========================================================================================================================================");
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -265,6 +307,71 @@ public class CustomerController {
                 return;
             }
 
+            UserAddressRepository addressRepository = new UserAddressRepository();
+            List<UserAddress> addresses = addressRepository.findByUserId(customer.getId());
+
+            if (addresses.isEmpty()) {
+                System.out.println("\nNo delivery address found.");
+                System.out.println("Please add a delivery address first.\n");
+
+                System.out.print("Mobile Number : ");
+                String mobile = sc.nextLine();
+
+                System.out.print("Address : ");
+                String address = sc.nextLine();
+
+                System.out.print("City : ");
+                String city = sc.nextLine();
+
+                System.out.print("Pincode : ");
+                String pincode = sc.nextLine();
+
+                UserAddress userAddress = new UserAddress(
+                        customer.getId(),
+                        mobile,
+                        address,
+                        city,
+                        pincode
+                );
+
+                addressRepository.save(userAddress);
+
+                addresses = addressRepository.findByUserId(customer.getId());
+            }
+
+            System.out.println("\n===============================================================");
+            System.out.printf("%-5s %-15s %-30s %-15s %-10s%n",
+                    "No",
+                    "Mobile",
+                    "Address",
+                    "City",
+                    "Pincode");
+            System.out.println("===============================================================");
+
+            for (int i = 0; i < addresses.size(); i++) {
+
+                UserAddress address = addresses.get(i);
+
+                System.out.printf("%-5d %-15s %-30s %-15s %-10s%n",
+                        (i + 1),
+                        address.getMobileNumber(),
+                        address.getAddress(),
+                        address.getCity(),
+                        address.getPincode());
+            }
+
+            System.out.println("===============================================================");
+
+            System.out.print("Select Address : ");
+            int addressChoice = Integer.parseInt(sc.nextLine());
+
+            if (addressChoice < 1 || addressChoice > addresses.size()) {
+                System.out.println("Invalid Address Selection.");
+                return;
+            }
+
+            UserAddress selectedAddress = addresses.get(addressChoice - 1);
+
             System.out.println("\n========== PAYMENT ==========");
             System.out.println("1. Cash On Delivery");
             System.out.println("2. UPI");
@@ -275,6 +382,7 @@ public class CustomerController {
             PaymentType paymentType;
 
             switch (choice) {
+
                 case 1:
                     paymentType = PaymentType.CASH;
                     break;
@@ -288,15 +396,30 @@ public class CustomerController {
                     return;
             }
 
-            Order order = orderService.placeOrder(
-                    customer.getId(),
-                    paymentType,
-                    40
-            );
+            /*
+             * Update your OrderService.placeOrder()
+             * to accept selectedAddress.getId()
+             */
+
+//            Order order = orderService.placeOrder(
+//                    customer.getId(),
+//                    paymentType,
+//                    40
+//            );
+
+            // AFTER modifying OrderService, replace above with:
+            //
+             Order order = orderService.placeOrder(
+                  customer.getId(),
+                  selectedAddress.getId(),
+                  paymentType,
+                  40
+             );
 
             Payment payment = paymentService.getPaymentByOrderId(order.getId());
 
-            PaymentFactory.getPaymentStrategy(paymentType)
+            PaymentFactory
+                    .getPaymentStrategy(paymentType)
                     .pay(payment);
 
             paymentService.updatePaymentStatus(
@@ -304,26 +427,33 @@ public class CustomerController {
                     payment.getPaymentStatus()
             );
 
-            System.out.println("\n==================================");
-            System.out.println("Order Placed Successfully");
-            System.out.println("==================================");
+            OrderOTP otp = new OrderOTPRepository().findByOrderId(order.getId());
+
+            System.out.println("\n======================================");
+            System.out.println("      ORDER PLACED SUCCESSFULLY");
+            System.out.println("======================================");
+
             System.out.println("Order Id : " + order.getId());
 
-            System.out.println(
-                    "Total Amount : ₹" +
-                            (order.getSubtotal()
-                                    - order.getDiscount()
-                                    + order.getDeliveryCharge())
-            );
+            System.out.println("\nDelivery Address");
+            System.out.println("--------------------------------------");
+            System.out.println(selectedAddress.getAddress());
+            System.out.println(selectedAddress.getCity());
+            System.out.println(selectedAddress.getPincode());
 
-            System.out.println("Payment : " + payment.getPaymentStatus());
+            System.out.println("\nTotal Amount : ₹"
+                    + (order.getSubtotal()
+                    - order.getDiscount()
+                    + order.getDeliveryCharge()));
 
-            if (paymentType == PaymentType.CASH)
-                System.out.println("Cash will be collected at delivery.");
-            else
-                System.out.println("UPI Payment Successful.");
+            System.out.println("Payment Status : " + payment.getPaymentStatus());
 
-        } catch (Exception e) {
+            System.out.println("\nDelivery OTP : " + otp.getOtp());
+
+            System.out.println("\nShare this OTP only with the delivery boy during delivery.");
+
+        }
+        catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -368,23 +498,37 @@ public class CustomerController {
             return;
         }
 
+        System.out.println("\n==============================================================================================================================");
+        System.out.printf("%-5s %-10s %-15s %-12s %-12s %-12s %-12s %-10s %-18s%n",
+                "No",
+                "Order ID",
+                "Restaurant",
+                "Subtotal",
+                "Discount",
+                "Delivery",
+                "Total",
+                "Payment",
+                "Status");
+        System.out.println("==============================================================================================================================");
+
+        int no = 1;
+
         for (Order order : orders) {
-            System.out.println("--------------------------------");
-            System.out.println("Order Id : " + order.getId());
-            System.out.println("Restaurant : " + order.getRestaurantId());
-            System.out.println("Subtotal : " + order.getSubtotal());
-            System.out.println("Discount : " + order.getDiscount());
-            System.out.println("Delivery Charge : " + order.getDeliveryCharge());
+            double total = order.getSubtotal() - order.getDiscount() + order.getDeliveryCharge();
 
-            System.out.println("Total : " +
-                    (order.getSubtotal()
-                            - order.getDiscount()
-                            + order.getDeliveryCharge()));
-
-            System.out.println("Payment : " + order.getPaymentType());
-
-            System.out.println("Status : " + order.getOrderState().getStatus());
+            System.out.printf("%-5d %-10s %-15s ₹%-11.2f ₹%-11.2f ₹%-11.2f ₹%-11.2f %-10s %-18s%n",
+                    no++,
+                    order.getId(),
+                    order.getRestaurantId(),
+                    order.getSubtotal(),
+                    order.getDiscount(),
+                    order.getDeliveryCharge(),
+                    total,
+                    order.getPaymentType(),
+                    order.getOrderState().getStatus());
         }
+
+        System.out.println("==============================================================================================================================");
     }
 
     private void cancelOrder(User customer) {
@@ -417,17 +561,29 @@ public class CustomerController {
 
         System.out.println();
 
+        System.out.println("\n==============================================================================================================");
+        System.out.printf("%-5s %-25s %-30s %-20s%n",
+                "No",
+                "Date & Time",
+                "Action",
+                "Performed By");
+        System.out.println("==============================================================================================================");
+
+        int no = 1;
+
         for (OrderLog log : logs) {
-            System.out.println("--------------------------------");
-            System.out.println(log.getActionDateTime());
-            System.out.println(log.getAction());
-            System.out.println("By : " + log.getActionBy());
+            System.out.printf("%-5d %-25s %-30s %-20s%n",
+                    no++,
+                    log.getActionDateTime(),
+                    log.getAction(),
+                    log.getActionBy());
         }
+
+        System.out.println("==============================================================================================================");
     }
 
     private void logout() {
         authenticationService.logout();
-        System.out.println("Logged Out Successfully.");
     }
 
 }

@@ -14,6 +14,7 @@ public class Order implements Serializable, Identifiable {
     private String customerId;
     private String restaurantId;
     private String deliveryBoyId;
+    private String deliveryAddressId;
     private LocalDateTime orderDateTime;
     private double subtotal;
     private double discount;
@@ -112,5 +113,13 @@ public class Order implements Serializable, Identifiable {
 
     public void setOrderState(OrderState orderState) {
         this.orderState = orderState;
+    }
+
+    public String getDeliveryAddressId() {
+        return deliveryAddressId;
+    }
+
+    public void setDeliveryAddressId(String deliveryAddressId) {
+        this.deliveryAddressId = deliveryAddressId;
     }
 }

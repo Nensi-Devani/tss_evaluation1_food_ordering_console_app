@@ -49,9 +49,10 @@ public class CheckoutFacade {
     }
 
     // ORDER
-    public Order placeOrder(String customerId, PaymentType paymentType, double deliveryCharge) {
+    public Order placeOrder(String customerId,  String deliveryAddressId, PaymentType paymentType, double deliveryCharge) {
         return orderService.placeOrder(
                 customerId,
+                deliveryAddressId,
                 paymentType,
                 deliveryCharge
         );

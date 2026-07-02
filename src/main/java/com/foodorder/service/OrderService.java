@@ -27,7 +27,7 @@ public class OrderService {
     private final CartItemRepository cartItemRepository = new CartItemRepository();
     private final MenuItemRepository menuItemRepository = new MenuItemRepository();
 
-    public Order placeOrder(String customerId, PaymentType paymentType, double deliveryCharge) {
+    public Order placeOrder(String customerId, String deliveryAddressId, PaymentType paymentType, double deliveryCharge) {
         Cart cart = cartRepository.findByCustomerId(customerId);
 
         if (cart == null) {
@@ -56,6 +56,7 @@ public class OrderService {
                 null
         );
 
+        order.setDeliveryAddressId(deliveryAddressId);
         order.setOrderState(new PlacedState());
 
         orderRepository.save(order);

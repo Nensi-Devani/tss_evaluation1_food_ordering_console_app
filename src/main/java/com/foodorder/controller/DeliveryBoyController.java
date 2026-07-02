@@ -47,8 +47,7 @@ public class DeliveryBoyController {
                     logout();
                     return;
 
-                default:
-                    System.out.println("Invalid Choice.");
+                default: System.out.println("Invalid Choice.");
             }
         }
     }
@@ -81,9 +80,18 @@ public class DeliveryBoyController {
             return;
         }
 
-        System.out.println("\n========== ASSIGNED ORDERS ==========");
+        System.out.println("\n==============================================================================================================");
+        System.out.printf("%-5s %-12s %-15s %-15s %-12s %-20s%n",
+                "No",
+                "Order ID",
+                "Customer ID",
+                "Restaurant",
+                "Amount",
+                "Status");
+        System.out.println("==============================================================================================================");
 
         boolean found = false;
+        int no = 1;
 
         for (Order order : orders) {
             if (order.getOrderState().getStatus().equals("DELIVERED"))
@@ -91,22 +99,23 @@ public class DeliveryBoyController {
 
             found = true;
 
-            System.out.println("--------------------------------");
-            System.out.println("Order Id       : " + order.getId());
-            System.out.println("Customer Id    : " + order.getCustomerId());
-            System.out.println("Restaurant Id  : " + order.getRestaurantId());
-            System.out.println("Amount         : "
-                    + (order.getSubtotal()
-                    - order.getDiscount()
-                    + order.getDeliveryCharge()));
-            System.out.println("Status         : "
-                    + order.getOrderState().getStatus());
+            double total = order.getSubtotal() - order.getDiscount() + order.getDeliveryCharge();
+
+            System.out.printf("%-5d %-12s %-15s %-15s ₹%-11.2f %-20s%n",
+                    no++,
+                    order.getId(),
+                    order.getCustomerId(),
+                    order.getRestaurantId(),
+                    total,
+                    order.getOrderState().getStatus());
         }
 
         if (!found) {
-            System.out.println("No Pending Orders.");
+            System.out.println("No Assigned Orders Found.");
             return;
         }
+
+        System.out.println("==============================================================================================================");
 
         System.out.println();
         System.out.println("1. Deliver Order");
@@ -144,23 +153,39 @@ public class DeliveryBoyController {
 
         int delivered = 0;
 
-        System.out.println("\n========== TODAY'S DELIVERIES ==========");
+        System.out.println("\n==============================================================================================================");
+        System.out.printf("%-5s %-12s %-15s %-15s %-12s%n",
+                "No",
+                "Order ID",
+                "Customer ID",
+                "Restaurant",
+                "Amount");
+        System.out.println("==============================================================================================================");
+
+        int no = 1;
 
         for (Order order : orders) {
-            if (order.getOrderState().getStatus().equals("DELIVERED")) {
-                delivered++;
+            if (!order.getOrderState().getStatus().equals("DELIVERED"))
+                continue;
 
-                System.out.println("--------------------------------");
-                System.out.println("Order Id : " + order.getId());
-                System.out.println("Customer : " + order.getCustomerId());
-                System.out.println("Restaurant : " + order.getRestaurantId());
+            delivered++;
 
-                System.out.println("Amount : " +
-                        (order.getSubtotal()
-                                - order.getDiscount()
-                                + order.getDeliveryCharge()));
-            }
+            double total = order.getSubtotal() - order.getDiscount() + order.getDeliveryCharge();
+
+            System.out.printf("%-5d %-12s %-15s %-15s ₹%-11.2f%n",
+                    no++,
+                    order.getId(),
+                    order.getCustomerId(),
+                    order.getRestaurantId(),
+                    total);
         }
+
+        if (delivered == 0) {
+            System.out.println("No Deliveries Found.");
+        }
+
+        System.out.println("==============================================================================================================");
+        System.out.println("Total Deliveries : " + delivered);
 
         if (delivered == 0) {
             System.out.println("No Deliveries Today.");
@@ -169,6 +194,5 @@ public class DeliveryBoyController {
 
     private void logout() {
         authService.logout();
-        new LoginController().start();
     }
 }

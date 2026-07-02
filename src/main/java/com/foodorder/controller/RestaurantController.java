@@ -50,9 +50,7 @@ public class RestaurantController {
 
                 default: System.out.println("Invalid Choice");
             }
-
         }
-
     }
 
     private void dashboard(User user) {
@@ -112,8 +110,7 @@ public class RestaurantController {
                     outForDelivery(user);
                     break;
 
-                case 0:
-                    return;
+                case 0: return;
             }
         }
     }

@@ -3,6 +3,7 @@ package com.foodorder.controller;
 import java.util.List;
 import java.util.Scanner;
 
+import com.foodorder.constants.AppConstants;
 import com.foodorder.enums.PaymentType;
 import com.foodorder.enums.Status;
 import com.foodorder.factory.PaymentFactory;
@@ -310,6 +311,7 @@ public class CustomerController {
             UserAddressRepository addressRepository = new UserAddressRepository();
             List<UserAddress> addresses = addressRepository.findByUserId(customer.getId());
 
+            UserAddress selectedAddress = null;
             if (addresses.isEmpty()) {
                 System.out.println("\nNo delivery address found.");
                 System.out.println("Please add a delivery address first.\n");
@@ -335,42 +337,140 @@ public class CustomerController {
                 );
 
                 addressRepository.save(userAddress);
-
                 addresses = addressRepository.findByUserId(customer.getId());
+            } else {
+
+                System.out.println("\n===============================================================");
+                System.out.printf("%-5s %-15s %-30s %-15s %-10s%n",
+                        "No",
+                        "Mobile",
+                        "Address",
+                        "City",
+                        "Pincode");
+                System.out.println("===============================================================");
+
+                for (int i = 0; i < addresses.size(); i++) {
+
+                    UserAddress address = addresses.get(i);
+
+                    System.out.printf("%-5d %-15s %-30s %-15s %-10s%n",
+                            (i + 1),
+                            address.getMobileNumber(),
+                            address.getAddress(),
+                            address.getCity(),
+                            address.getPincode());
+                }
+
+                System.out.println("===============================================================");
+                System.out.println((addresses.size() + 1) + ". Add New Address");
+
+                System.out.print("Select Address : ");
+                int addressChoice = Integer.parseInt(sc.nextLine());
+
+                if (addressChoice == addresses.size() + 1) {
+
+                    System.out.print("Mobile Number : ");
+                    String mobile = sc.nextLine();
+
+                    System.out.print("Address : ");
+                    String address = sc.nextLine();
+
+                    System.out.print("City : ");
+                    String city = sc.nextLine();
+
+                    System.out.print("Pincode : ");
+                    String pincode = sc.nextLine();
+
+                    UserAddress userAddress = new UserAddress(
+                            customer.getId(),
+                            mobile,
+                            address,
+                            city,
+                            pincode
+                    );
+
+                    addressRepository.save(userAddress);
+                    addresses = addressRepository.findByUserId(customer.getId());
+
+                    selectedAddress = addresses.get(addresses.size() - 1);
+
+                } else {
+
+                    if (addressChoice < 1 || addressChoice > addresses.size()) {
+                        System.out.println("Invalid Address Selection.");
+                        return;
+                    }
+
+                    selectedAddress = addresses.get(addressChoice - 1);
+                }
             }
 
-            System.out.println("\n===============================================================");
-            System.out.printf("%-5s %-15s %-30s %-15s %-10s%n",
-                    "No",
-                    "Mobile",
-                    "Address",
-                    "City",
-                    "Pincode");
-            System.out.println("===============================================================");
-
-            for (int i = 0; i < addresses.size(); i++) {
-
-                UserAddress address = addresses.get(i);
-
-                System.out.printf("%-5d %-15s %-30s %-15s %-10s%n",
-                        (i + 1),
-                        address.getMobileNumber(),
-                        address.getAddress(),
-                        address.getCity(),
-                        address.getPincode());
+// If there were no addresses initially, use the newly added one.
+            if (addresses.size() == 1 && selectedAddress == null) {
+                selectedAddress = addresses.get(0);
             }
 
-            System.out.println("===============================================================");
-
-            System.out.print("Select Address : ");
-            int addressChoice = Integer.parseInt(sc.nextLine());
-
-            if (addressChoice < 1 || addressChoice > addresses.size()) {
-                System.out.println("Invalid Address Selection.");
-                return;
-            }
-
-            UserAddress selectedAddress = addresses.get(addressChoice - 1);
+//            if (addresses.isEmpty()) {
+//                System.out.println("\nNo delivery address found.");
+//                System.out.println("Please add a delivery address first.\n");
+//
+//                System.out.print("Mobile Number : ");
+//                String mobile = sc.nextLine();
+//
+//                System.out.print("Address : ");
+//                String address = sc.nextLine();
+//
+//                System.out.print("City : ");
+//                String city = sc.nextLine();
+//
+//                System.out.print("Pincode : ");
+//                String pincode = sc.nextLine();
+//
+//                UserAddress userAddress = new UserAddress(
+//                        customer.getId(),
+//                        mobile,
+//                        address,
+//                        city,
+//                        pincode
+//                );
+//
+//                addressRepository.save(userAddress);
+//
+//                addresses = addressRepository.findByUserId(customer.getId());
+//            }
+//
+//            System.out.println("\n===============================================================");
+//            System.out.printf("%-5s %-15s %-30s %-15s %-10s%n",
+//                    "No",
+//                    "Mobile",
+//                    "Address",
+//                    "City",
+//                    "Pincode");
+//            System.out.println("===============================================================");
+//
+//            for (int i = 0; i < addresses.size(); i++) {
+//
+//                UserAddress address = addresses.get(i);
+//
+//                System.out.printf("%-5d %-15s %-30s %-15s %-10s%n",
+//                        (i + 1),
+//                        address.getMobileNumber(),
+//                        address.getAddress(),
+//                        address.getCity(),
+//                        address.getPincode());
+//            }
+//
+//            System.out.println("===============================================================");
+//
+//            System.out.print("Select Address : ");
+//            int addressChoice = Integer.parseInt(sc.nextLine());
+//
+//            if (addressChoice < 1 || addressChoice > addresses.size()) {
+//                System.out.println("Invalid Address Selection.");
+//                return;
+//            }
+//
+//            UserAddress selectedAddress = addresses.get(addressChoice - 1);
 
             System.out.println("\n========== PAYMENT ==========");
             System.out.println("1. Cash On Delivery");
@@ -396,25 +496,25 @@ public class CustomerController {
                     return;
             }
 
-            /*
-             * Update your OrderService.placeOrder()
-             * to accept selectedAddress.getId()
-             */
+            int totalItems = cartItems.stream()
+                    .mapToInt(CartItem::getQuantity)
+                    .sum();
 
-//            Order order = orderService.placeOrder(
-//                    customer.getId(),
-//                    paymentType,
-//                    40
-//            );
+            double deliveryCharge;
+            if (totalItems <= 2) {
+                deliveryCharge = AppConstants.DELIVERY_CHARGE_UPTO_2_ITEMS;
+            } else if (totalItems <= 4) {
+                deliveryCharge = AppConstants.DELIVERY_CHARGE_UPTO_4_ITEMS;
+            } else {
+                deliveryCharge = AppConstants.DELIVERY_CHARGE_ABOVE_4_ITEMS;
+            }
 
-            // AFTER modifying OrderService, replace above with:
-            //
-             Order order = orderService.placeOrder(
-                  customer.getId(),
-                  selectedAddress.getId(),
-                  paymentType,
-                  40
-             );
+            Order order = orderService.placeOrder(
+                    customer.getId(),
+                    selectedAddress.getId(),
+                    paymentType,
+                    deliveryCharge
+            );
 
             Payment payment = paymentService.getPaymentByOrderId(order.getId());
 

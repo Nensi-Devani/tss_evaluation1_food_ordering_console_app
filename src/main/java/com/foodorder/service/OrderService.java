@@ -141,7 +141,7 @@ public class OrderService {
         }
 
 //        if (!order.getOrderState().toString().equals("OUT_FOR_DELIVERY")) {
-//            throw new RuntimeException("Order is not ready for delivery");
+//            throw new RuntimeException("Order can not assign.");
 //        }
 
         String restaurantId = order.getRestaurantId();

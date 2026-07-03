@@ -499,7 +499,8 @@ public class AdminController {
                 "Delivery",
                 "Total",
                 "Payment",
-                "Status");
+                "Status",
+                "Ordered On");
         System.out.println("==========================================================================================================================================================================");
 
         int no = 1;
@@ -520,7 +521,9 @@ public class AdminController {
                     order.getDeliveryCharge(),
                     total,
                     order.getPaymentType(),
-                    order.getOrderState().getStatus());
+                    order.getOrderState().getStatus(),
+                    order.getOrderDateTime()
+            );
         }
 
         System.out.println("==========================================================================================================================================================================");

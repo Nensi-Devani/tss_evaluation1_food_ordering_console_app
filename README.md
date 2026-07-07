@@ -115,13 +115,13 @@ Order Delivered
 
 # 🚀 Getting Started
 
-### Clone the repository
+### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Nensi-Devani/tss_evaluation1_food_ordering_console_app
 ```
 
-### Open Project
+### 2. Open Project
 
 Open the project in your preferred IDE.
 
@@ -130,7 +130,7 @@ Examples:
 - Eclipse
 - VS Code
 
-### Run
+### 3. Run
 
 Execute
 

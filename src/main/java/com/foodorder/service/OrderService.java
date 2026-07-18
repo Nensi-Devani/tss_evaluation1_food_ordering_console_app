@@ -140,10 +140,6 @@ public class OrderService {
             throw new OrderNotFoundException(MessageConstants.ORDER_NOT_FOUND);
         }
 
-//        if (!order.getOrderState().toString().equals("OUT_FOR_DELIVERY")) {
-//            throw new RuntimeException("Order can not assign.");
-//        }
-
         String restaurantId = order.getRestaurantId();
 
         List<User> deliveryBoys = new UserRepository().findAllDeliveryBoys();

@@ -9,8 +9,8 @@ public class Main {
 
         LoginController loginController = new LoginController();
 
-//        while (true) {
+        while (true) {
             loginController.start();
-//        }
+        }
     }
 }

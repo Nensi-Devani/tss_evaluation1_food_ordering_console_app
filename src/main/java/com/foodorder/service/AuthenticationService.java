@@ -15,7 +15,7 @@ public class AuthenticationService {
     }
 
     public void logout() {
-        new LoginController().start();
         System.out.println("\nLogged out successfully.");
+        new LoginController().start();
     }
 }

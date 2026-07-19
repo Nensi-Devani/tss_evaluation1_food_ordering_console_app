@@ -44,14 +44,15 @@ public class UserRepository {
     }
 
     public void update(User user) {
-        String query = "UPDATE users SET name = ?, email = ? WHERE user_id = ?";
+        String query = "UPDATE users SET name = ?, email = ?, status = ? WHERE user_id = ?";
 
         try {
             preparedStatement = connection.prepareStatement(query);
 
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
-            preparedStatement.setLong(3, Integer.parseInt(user.getId()));
+            preparedStatement.setString(3,user.getStatus().name());
+            preparedStatement.setLong(4, Integer.parseInt(user.getId()));
 
             int rowsUpdated = preparedStatement.executeUpdate();
 
@@ -65,7 +66,7 @@ public class UserRepository {
     }
 
     public User findById(String id) {
-        String query = "SELECT * FROM users WHERE id = ?";
+        String query = "SELECT * FROM users WHERE user_id = ?";
 
         try{
             preparedStatement = connection.prepareStatement(query);
@@ -89,7 +90,6 @@ public class UserRepository {
         catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
-
 
         throw new UserNotFoundException(MessageConstants.USER_NOT_FOUND);
     }

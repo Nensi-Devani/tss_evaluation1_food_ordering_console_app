@@ -1,13 +1,11 @@
 package com.foodorder.repository;
 
-import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.MessageConstants;
 import com.foodorder.database.DatabaseConnection;
 import com.foodorder.enums.Role;
 import com.foodorder.enums.Status;
 import com.foodorder.exception.UserNotFoundException;
 import com.foodorder.model.User;
-import com.foodorder.util.FileUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -46,27 +44,52 @@ public class UserRepository {
     }
 
     public void update(User user) {
-        List<User> users = FileUtil.readData(FileConstants.USERS_FILE);
+        String query = "UPDATE users SET name = ?, email = ? WHERE user_id = ?";
 
-        for (int i = 0; i < users.size(); i++) {
-            if (users.get(i).getId().equals(user.getId())) {
-                users.set(i, user);
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-                FileUtil.writeData(FileConstants.USERS_FILE, users);
-                return;
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getEmail());
+            preparedStatement.setLong(3, Integer.parseInt(user.getId()));
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new UserNotFoundException(MessageConstants.USER_NOT_FOUND);
             }
-        }
 
-        throw new UserNotFoundException(MessageConstants.USER_NOT_FOUND);
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public User findById(String id) {
-        List<User> users = FileUtil.readData(FileConstants.USERS_FILE);
+        String query = "SELECT * FROM users WHERE id = ?";
 
-        for (User user : users) {
-            if (user.getId().equals(id))
+        try{
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, Integer.parseInt(id));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                User user = new User();
+
+                user.setId(String.valueOf(resultSet.getInt("user_id")));
+                user.setName(resultSet.getString("name"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(Role.valueOf(resultSet.getString("role")));
+                user.setStatus(Status.valueOf(resultSet.getString("status")));
+
                 return user;
+            }
         }
+        catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
 
         throw new UserNotFoundException(MessageConstants.USER_NOT_FOUND);
     }
@@ -99,17 +122,57 @@ public class UserRepository {
     }
 
     public List<User> findAll() {
-        return FileUtil.readData(FileConstants.USERS_FILE);
+        List<User> users = new ArrayList<>();
+
+        String query = "SELECT * FROM users";
+
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = new User();
+
+                user.setId(String.valueOf(resultSet.getInt("user_id")));
+                user.setName(resultSet.getString("name"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(Role.valueOf(resultSet.getString("role")));
+                user.setStatus(Status.valueOf(resultSet.getString("status")));
+
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return users;
     }
 
     public List<User> findAllActive() {
         List<User> activeUsers = new ArrayList<>();
 
-        List<User> users = FileUtil.readData(FileConstants.USERS_FILE);
+        String query = "SELECT * FROM users WHERE status = ?";
 
-        for (User user : users) {
-            if (user.getStatus() == Status.ACTIVE)
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, Status.ACTIVE.name());
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = new User();
+
+                user.setId(String.valueOf(resultSet.getInt("user_id")));
+                user.setName(resultSet.getString("name"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(Role.valueOf(resultSet.getString("role")));
+                user.setStatus(Status.valueOf(resultSet.getString("status")));
+
                 activeUsers.add(user);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return activeUsers;
@@ -118,24 +181,57 @@ public class UserRepository {
     public List<User> findAllInactive() {
         List<User> inactiveUsers = new ArrayList<>();
 
-        List<User> users = FileUtil.readData(FileConstants.USERS_FILE);
+        String query = "SELECT * FROM users WHERE status = ?";
 
-        for (User user : users) {
-            if (user.getStatus() == Status.INACTIVE)
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, Status.INACTIVE.name());
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = new User();
+
+                user.setId(String.valueOf(resultSet.getInt("user_id")));
+                user.setName(resultSet.getString("name"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(Role.valueOf(resultSet.getString("role")));
+                user.setStatus(Status.valueOf(resultSet.getString("status")));
+
                 inactiveUsers.add(user);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return inactiveUsers;
     }
 
     public List<User> findAllDeliveryBoys() {
-        List<User> users = FileUtil.readData(FileConstants.USERS_FILE);
-
         List<User> deliveryBoys = new ArrayList<>();
 
-        for (User user : users) {
-            if (user.getRole() == Role.DELIVERY_BOY)
+        String query = "SELECT * FROM users WHERE role = ?";
+
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, Role.DELIVERY_BOY.name());
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = new User();
+
+                user.setId(String.valueOf(resultSet.getLong("user_id")));
+                user.setName(resultSet.getString("name"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(Role.valueOf(resultSet.getString("role")));
+                user.setStatus(Status.valueOf(resultSet.getString("status")));
+
                 deliveryBoys.add(user);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return deliveryBoys;

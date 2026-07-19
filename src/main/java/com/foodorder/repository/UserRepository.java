@@ -82,7 +82,9 @@ public class UserRepository {
                 user.setId(resultSet.getString("user_id"));
                 user.setName(resultSet.getString("name"));
                 user.setEmail(resultSet.getString("email"));
+                user.setPassword(resultSet.getString("password"));
                 user.setRole(Role.valueOf(resultSet.getString("role")));
+                user.setStatus(Status.valueOf(resultSet.getString("status")));
 
                 return user;
             }

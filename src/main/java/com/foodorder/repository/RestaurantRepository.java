@@ -1,28 +1,44 @@
 package com.foodorder.repository;
 
 import com.foodorder.constants.FileConstants;
-import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.database.DatabaseConnection;
 import com.foodorder.enums.Status;
 import com.foodorder.exception.RestaurantNotFoundException;
 import com.foodorder.model.Restaurant;
 import com.foodorder.util.FileUtil;
-import com.foodorder.util.IdGenerator;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantRepository {
+    Connection connection;
+    PreparedStatement preparedStatement;
+
+    public RestaurantRepository(){
+        connection = DatabaseConnection
+                        .getInstance()
+                        .getConnection();
+    }
+
     public void save(Restaurant restaurant) {
-        List<Restaurant> restaurants = FileUtil.readData(FileConstants.RESTAURANTS_FILE);
+        String query = "INSERT INTO restaurants (owner_id, name, status, mobile_no, city) VALUES (?, ?, ?, ?, ?)";
 
-        restaurant.setId(IdGenerator.generateId(
-                FileConstants.RESTAURANTS_FILE,
-                IdConstants.RESTAURANT_ID_PREFIX));
+        try{
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, Integer.parseInt(restaurant.getOwnerId()));
+            preparedStatement.setString(2, restaurant.getName());
+            preparedStatement.setString(3,restaurant.getStatus().name());
+            preparedStatement.setString(4, restaurant.getMobileNumber());
+            preparedStatement.setString(5, restaurant.getCity());
 
-        restaurants.add(restaurant);
-
-        FileUtil.writeData(FileConstants.RESTAURANTS_FILE, restaurants);
+            preparedStatement.executeUpdate();
+        }catch (SQLException e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(Restaurant restaurant) {

@@ -9,10 +9,7 @@ import com.foodorder.exception.UserNotFoundException;
 import com.foodorder.model.User;
 import com.foodorder.util.FileUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +27,7 @@ public class UserRepository {
        String query = "INSERT INTO users (name, email, password, role, status) VALUES (?, ?, ?, ?, ?)";
 
        try{
-           preparedStatement = connection.prepareStatement(query);
+           preparedStatement = connection.prepareStatement(query,  Statement.RETURN_GENERATED_KEYS);
            preparedStatement.setString(1, user.getName());
            preparedStatement.setString(2, user.getEmail());
            preparedStatement.setString(3, user.getPassword());
@@ -38,6 +35,11 @@ public class UserRepository {
            preparedStatement.setString(5,user.getStatus().name());
 
            preparedStatement.executeUpdate();
+
+           ResultSet resultSet = preparedStatement.getGeneratedKeys();
+           if (resultSet.next()) {
+               user.setId(String.valueOf(resultSet.getInt(1))); // Store generated ID in the User object
+           }
        }catch (SQLException e){
            throw new RuntimeException(e.getMessage());
        }

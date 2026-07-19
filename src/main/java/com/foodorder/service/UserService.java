@@ -40,21 +40,15 @@ public class UserService {
             Restaurant restaurant = new Restaurant();
             Scanner sc = new Scanner(System.in);
 
-            if(user.getRole() == Role.RESTAURANT){
-                System.out.print("Mobile: ");
-                restaurant.setMobileNumber(sc.nextLine());
+            System.out.print("Mobile: ");
+            restaurant.setMobileNumber(sc.nextLine());
 
-                System.out.print("City: ");
-                restaurant.setCity(sc.nextLine());
-            }
+            System.out.print("City: ");
+            restaurant.setCity(sc.nextLine());
 
-            restaurant.setId(IdGenerator.generateId(
-                    FileConstants.RESTAURANTS_FILE,
-                    IdConstants.RESTAURANT_ID_PREFIX)
-            );
             restaurant.setName(user.getName());
-            restaurant.setOwnerId(user.getId());   // if your Restaurant has this field
-            restaurant.setStatus(Status.INACTIVE); // if Restaurant has a status field
+            restaurant.setOwnerId(user.getId());
+            restaurant.setStatus(Status.INACTIVE);
 
             restaurantRepository.save(restaurant);
         }

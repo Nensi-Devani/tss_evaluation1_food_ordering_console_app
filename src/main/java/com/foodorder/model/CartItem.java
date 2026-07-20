@@ -12,6 +12,9 @@ public class CartItem implements Serializable, Identifiable {
     private String menuItemId;
     private int quantity;
 
+    public CartItem(){
+    }
+
     public CartItem(String cartId, String menuItemId, int quantity) {
         this.cartId = cartId;
         this.menuItemId = menuItemId;

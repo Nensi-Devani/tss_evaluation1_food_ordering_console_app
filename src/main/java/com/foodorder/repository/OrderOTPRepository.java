@@ -1,27 +1,41 @@
 package com.foodorder.repository;
 
+import java.sql.*;
 import java.util.List;
 
 import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.database.DatabaseConnection;
 import com.foodorder.exception.OTPNotFoundException;
 import com.foodorder.model.OrderOTP;
 import com.foodorder.util.FileUtil;
 import com.foodorder.util.IdGenerator;
 
+import javax.xml.crypto.Data;
+
 public class OrderOTPRepository {
+    Connection connection;
+    PreparedStatement preparedStatement;
+
+    public OrderOTPRepository(){
+        connection = DatabaseConnection.getInstance().getConnection();
+    }
 
     public void save(OrderOTP orderOTP) {
-        List<OrderOTP> orderOTPs = FileUtil.readData(FileConstants.ORDER_OTPS_FILE);
+        String query = "INSERT INTO order_otps (order_id, otp, generated_at) VALUES (?, ?, ?)";
 
-        orderOTP.setId(IdGenerator.generateId(
-                FileConstants.ORDER_OTPS_FILE,
-                IdConstants.ORDER_OTP_ID_PREFIX));
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-        orderOTPs.add(orderOTP);
+            preparedStatement.setLong(1, Long.parseLong(orderOTP.getOrderId()));
+            preparedStatement.setString(2, orderOTP.getOtp());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(orderOTP.getGeneratedAt()));
 
-        FileUtil.writeData(FileConstants.ORDER_OTPS_FILE, orderOTPs);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(OrderOTP orderOTP) {
@@ -51,11 +65,25 @@ public class OrderOTPRepository {
     }
 
     public OrderOTP findByOrderId(String orderId) {
-        List<OrderOTP> orderOTPs = FileUtil.readData(FileConstants.ORDER_OTPS_FILE);
+        String query = "SELECT * FROM order_otps WHERE order_id = ?";
 
-        for (OrderOTP orderOTP : orderOTPs) {
-            if (orderOTP.getOrderId().equals(orderId))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(orderId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                OrderOTP orderOTP = new OrderOTP();
+
+                orderOTP.setId(String.valueOf(resultSet.getLong("order_otp_id")));
+                orderOTP.setOrderId(String.valueOf(resultSet.getLong("order_id")));
+                orderOTP.setOtp(resultSet.getString("otp"));
+                orderOTP.setGeneratedAt( resultSet.getTimestamp("generated_at").toLocalDateTime());
+
                 return orderOTP;
+            }
+        } catch(SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return null;

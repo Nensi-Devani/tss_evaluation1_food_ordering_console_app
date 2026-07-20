@@ -1,9 +1,6 @@
 package com.foodorder.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,15 +25,20 @@ public class OrderLogRepository {
     }
 
     public void save(OrderLog orderLog) {
-        List<OrderLog> orderLogs = FileUtil.readData(FileConstants.ORDER_LOGS_FILE);
+        String query = "INSERT INTO order_logs (order_id, action, action_taken_by, action_date_time) VALUES (?, ?, ?, ?)";
 
-        orderLog.setId(IdGenerator.generateId(
-                FileConstants.ORDER_LOGS_FILE,
-                IdConstants.ORDER_LOG_ID_PREFIX));
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-        orderLogs.add(orderLog);
+            preparedStatement.setLong(1, Long.parseLong(orderLog.getOrderId()));
+            preparedStatement.setString(2, orderLog.getAction().name());
+            preparedStatement.setLong(3, Long.parseLong(orderLog.getActionBy()));
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(orderLog.getActionDateTime()));
 
-        FileUtil.writeData(FileConstants.ORDER_LOGS_FILE, orderLogs);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(OrderLog orderLog) {

@@ -22,20 +22,14 @@ public class CustomerController {
 
     // Services
     private final AuthenticationService authenticationService = new AuthenticationService();
-//    private final RestaurantService restaurantService = new RestaurantService();
-//    private final MenuItemService menuItemService = new MenuItemService();
     private final CartService cartService = new CartService();
     private final OrderService orderService = new OrderService();
     private final PaymentService paymentService = new PaymentService();
-    private final OrderLogService orderLogService = new OrderLogService();
 
     // Repositories
     private final RestaurantRepository restaurantRepository = new RestaurantRepository();
     private final MenuItemRepository menuItemRepository = new MenuItemRepository();
     private final CartRepository cartRepository = new CartRepository();
-//    private final CartItemRepository cartItemRepository = new CartItemRepository();
-//    private final OrderRepository orderRepository = new OrderRepository();
-//    private final OrderLogRepository orderLogRepository = new OrderLogRepository();
 
     public void menu(User customer) {
         while (true) {
@@ -253,12 +247,8 @@ public class CustomerController {
 
                 double actualPrice = menuItem.getPrice();
                 double discount = menuItem.getDiscount();
-
-                double priceAfterDiscount =
-                        actualPrice - (actualPrice * discount / 100);
-
-                double amount =
-                        priceAfterDiscount * cartItem.getQuantity();
+                double priceAfterDiscount = actualPrice - (actualPrice * discount / 100);
+                double amount = priceAfterDiscount * cartItem.getQuantity();
 
                 total += amount;
 
@@ -292,7 +282,6 @@ public class CustomerController {
             cartService.removeItem(cartItemId);
 
             System.out.println("Item Removed Successfully.");
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -339,7 +328,6 @@ public class CustomerController {
                 addressRepository.save(userAddress);
                 addresses = addressRepository.findByUserId(customer.getId());
             } else {
-
                 System.out.println("\n===============================================================");
                 System.out.printf("%-5s %-15s %-30s %-15s %-10s%n",
                         "No",
@@ -350,7 +338,6 @@ public class CustomerController {
                 System.out.println("===============================================================");
 
                 for (int i = 0; i < addresses.size(); i++) {
-
                     UserAddress address = addresses.get(i);
 
                     System.out.printf("%-5d %-15s %-30s %-15s %-10s%n",
@@ -368,7 +355,6 @@ public class CustomerController {
                 int addressChoice = Integer.parseInt(sc.nextLine());
 
                 if (addressChoice == addresses.size() + 1) {
-
                     System.out.print("Mobile Number : ");
                     String mobile = sc.nextLine();
 
@@ -393,7 +379,6 @@ public class CustomerController {
                     addresses = addressRepository.findByUserId(customer.getId());
 
                     selectedAddress = addresses.get(addresses.size() - 1);
-
                 } else {
 
                     if (addressChoice < 1 || addressChoice > addresses.size()) {
@@ -410,68 +395,6 @@ public class CustomerController {
                 selectedAddress = addresses.get(0);
             }
 
-//            if (addresses.isEmpty()) {
-//                System.out.println("\nNo delivery address found.");
-//                System.out.println("Please add a delivery address first.\n");
-//
-//                System.out.print("Mobile Number : ");
-//                String mobile = sc.nextLine();
-//
-//                System.out.print("Address : ");
-//                String address = sc.nextLine();
-//
-//                System.out.print("City : ");
-//                String city = sc.nextLine();
-//
-//                System.out.print("Pincode : ");
-//                String pincode = sc.nextLine();
-//
-//                UserAddress userAddress = new UserAddress(
-//                        customer.getId(),
-//                        mobile,
-//                        address,
-//                        city,
-//                        pincode
-//                );
-//
-//                addressRepository.save(userAddress);
-//
-//                addresses = addressRepository.findByUserId(customer.getId());
-//            }
-//
-//            System.out.println("\n===============================================================");
-//            System.out.printf("%-5s %-15s %-30s %-15s %-10s%n",
-//                    "No",
-//                    "Mobile",
-//                    "Address",
-//                    "City",
-//                    "Pincode");
-//            System.out.println("===============================================================");
-//
-//            for (int i = 0; i < addresses.size(); i++) {
-//
-//                UserAddress address = addresses.get(i);
-//
-//                System.out.printf("%-5d %-15s %-30s %-15s %-10s%n",
-//                        (i + 1),
-//                        address.getMobileNumber(),
-//                        address.getAddress(),
-//                        address.getCity(),
-//                        address.getPincode());
-//            }
-//
-//            System.out.println("===============================================================");
-//
-//            System.out.print("Select Address : ");
-//            int addressChoice = Integer.parseInt(sc.nextLine());
-//
-//            if (addressChoice < 1 || addressChoice > addresses.size()) {
-//                System.out.println("Invalid Address Selection.");
-//                return;
-//            }
-//
-//            UserAddress selectedAddress = addresses.get(addressChoice - 1);
-
             System.out.println("\n========== PAYMENT ==========");
             System.out.println("1. Cash On Delivery");
             System.out.println("2. UPI");
@@ -482,7 +405,6 @@ public class CustomerController {
             PaymentType paymentType;
 
             switch (choice) {
-
                 case 1:
                     paymentType = PaymentType.CASH;
                     break;
@@ -518,6 +440,7 @@ public class CustomerController {
 
             Payment payment = paymentService.getPaymentByOrderId(order.getId());
 
+            System.out.println("Before pay : " + payment.getPaymentStatus());
             PaymentFactory
                     .getPaymentStrategy(paymentType)
                     .pay(payment);

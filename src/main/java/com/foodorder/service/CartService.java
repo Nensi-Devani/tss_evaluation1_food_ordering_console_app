@@ -38,24 +38,13 @@ public class CartService {
 
     // Remove item from cart
     public void removeItem(String cartItemId) {
-        List<CartItem> cartItems = cartItemRepository.findAll();
+        CartItem cartItem = cartItemRepository.findById(cartItemId);
 
-        CartItem itemToRemove = null;
-
-        for (CartItem item : cartItems) {
-            if (item.getId().equals(cartItemId)) {
-                itemToRemove = item;
-                break;
-            }
-        }
-
-        if (itemToRemove == null) {
+        if (cartItem == null) {
             throw new CartNotFoundException(MessageConstants.CART_NOT_FOUND);
         }
 
-        cartItems.remove(itemToRemove);
-
-        FileUtil.writeData(FileConstants.CART_ITEMS_FILE, cartItems);
+        cartItemRepository.delete(cartItemId);
     }
 
     // Get cart by customerId

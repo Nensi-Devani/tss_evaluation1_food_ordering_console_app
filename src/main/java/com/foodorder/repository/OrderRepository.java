@@ -1,9 +1,6 @@
 package com.foodorder.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,30 +26,50 @@ public class OrderRepository {
     }
 
     public void save(Order order) {
-        List<Order> orders = FileUtil.readData(FileConstants.ORDERS_FILE);
+        String query = "INSERT INTO orders (customer_id, restaurant_id, delivery_boy_id, order_date_time, sub_total, discount, delivery_charge, payment_type, order_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        order.setId(IdGenerator.generateId(
-                FileConstants.ORDERS_FILE,
-                IdConstants.ORDER_ID_PREFIX));
+        try {
+            preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-        orders.add(order);
+            preparedStatement.setLong(1, Long.parseLong(order.getCustomerId()));
+            preparedStatement.setLong(2, Long.parseLong(order.getRestaurantId()));
+            preparedStatement.setObject(3, null);
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(order.getOrderDateTime()));
+            preparedStatement.setDouble(5, order.getSubtotal());
+            preparedStatement.setDouble(6, order.getDiscount());
+            preparedStatement.setDouble(7, order.getDeliveryCharge());
+            preparedStatement.setString(8, order.getPaymentType().name());
+            preparedStatement.setString(9, "PLACED");
 
-        FileUtil.writeData(FileConstants.ORDERS_FILE, orders);
+            preparedStatement.executeUpdate();
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                order.setId(String.valueOf(resultSet.getLong(1)));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(Order order) {
-        List<Order> orders = FileUtil.readData(FileConstants.ORDERS_FILE);
+        String query = "UPDATE orders SET sub_total=?, discount=?, delivery_charge=?, payment_type=?, order_status=? WHERE order_id=?";
 
-        for (int i = 0; i < orders.size(); i++) {
-            if (orders.get(i).getId().equals(order.getId())) {
-                orders.set(i, order);
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-                FileUtil.writeData(FileConstants.ORDERS_FILE, orders);
-                return;
-            }
+            preparedStatement.setDouble(1, order.getSubtotal());
+            preparedStatement.setDouble(2, order.getDiscount());
+            preparedStatement.setDouble(3, order.getDeliveryCharge());
+            preparedStatement.setString(4, order.getPaymentType().name());
+            preparedStatement.setString(5, "PLACED");
+            preparedStatement.setLong(6, Long.parseLong(order.getId()));
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        throw new OrderNotFoundException(MessageConstants.ORDER_NOT_FOUND);
     }
 
     public Order findById(String id) {

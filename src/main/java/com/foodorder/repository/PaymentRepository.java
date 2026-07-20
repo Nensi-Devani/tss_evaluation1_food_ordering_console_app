@@ -1,61 +1,112 @@
 package com.foodorder.repository;
 
+import java.sql.*;
 import java.util.List;
 
 import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.database.DatabaseConnection;
+import com.foodorder.enums.PaymentStatus;
+import com.foodorder.enums.PaymentType;
 import com.foodorder.exception.PaymentFailedException;
 import com.foodorder.model.Payment;
+import com.foodorder.service.PaymentService;
 import com.foodorder.util.FileUtil;
 import com.foodorder.util.IdGenerator;
 
 public class PaymentRepository {
+    Connection connection;
+    PreparedStatement preparedStatement;
+
+    public PaymentRepository(){
+        connection = DatabaseConnection.getInstance().getConnection();
+    }
 
     public void save(Payment payment) {
-        List<Payment> payments = FileUtil.readData(FileConstants.PAYMENTS_FILE);
+        String query = "INSERT INTO payments (order_id, amount, payment_type, payment_status) VALUES (?, ?, ?, ?)";
 
-        payment.setId(IdGenerator.generateId(
-                FileConstants.PAYMENTS_FILE,
-                IdConstants.PAYMENT_ID_PREFIX));
+        try {
+            preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-        payments.add(payment);
+            preparedStatement.setLong(1, Long.parseLong(payment.getOrderId()));
+            preparedStatement.setDouble(2, payment.getAmount());
+            preparedStatement.setString(3, payment.getPaymentType().name());
+            preparedStatement.setString(4, payment.getPaymentStatus().name());
 
-        FileUtil.writeData(FileConstants.PAYMENTS_FILE, payments);
+            preparedStatement.executeUpdate();
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                payment.setId(String.valueOf(resultSet.getLong(1)));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(Payment payment) {
-        List<Payment> payments = FileUtil.readData(FileConstants.PAYMENTS_FILE);
+        String query = "UPDATE payments SET payment_status=? WHERE payment_id=?";
 
-        for (int i = 0; i < payments.size(); i++) {
-            if (payments.get(i).getId().equals(payment.getId())) {
-                payments.set(i, payment);
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, payment.getPaymentStatus().name());
+            preparedStatement.setLong(2, Long.parseLong(payment.getId()));
 
-                FileUtil.writeData(FileConstants.PAYMENTS_FILE, payments);
-                return;
-            }
+            preparedStatement.executeUpdate();
+        } catch(SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        throw new PaymentFailedException(MessageConstants.PAYMENT_FAILED);
     }
 
     public Payment findById(String id) {
-        List<Payment> payments = FileUtil.readData(FileConstants.PAYMENTS_FILE);
+        String query = "SELECT * FROM payments WHERE payment_id = ?";
 
-        for (Payment payment : payments) {
-            if (payment.getId().equals(id))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(id));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                Payment payment = new Payment();
+
+                payment.setId(String.valueOf(resultSet.getLong("payment_id")));
+                payment.setOrderId(String.valueOf(resultSet.getLong("order_id")));
+                payment.setAmount(resultSet.getDouble("amount"));
+                payment.setPaymentType(PaymentType.valueOf(resultSet.getString("payment_type")));
+                payment.setPaymentStatus(PaymentStatus.valueOf(resultSet.getString("payment_status")));
+
                 return payment;
+            }
+        } catch(SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
-        throw new PaymentFailedException(MessageConstants.PAYMENT_FAILED);
+        return null;
     }
 
     public Payment findByOrderId(String orderId) {
-        List<Payment> payments = FileUtil.readData(FileConstants.PAYMENTS_FILE);
+        String query = "SELECT * FROM payments WHERE order_id = ?";
 
-        for (Payment payment : payments) {
-            if (payment.getOrderId().equals(orderId))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(orderId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                Payment payment = new Payment();
+
+                payment.setId(String.valueOf(resultSet.getLong("payment_id")));
+                payment.setOrderId(String.valueOf(resultSet.getLong("order_id")));
+                payment.setAmount(resultSet.getDouble("amount"));
+                payment.setPaymentType(PaymentType.valueOf(resultSet.getString("payment_type")));
+                payment.setPaymentStatus(PaymentStatus.valueOf(resultSet.getString("payment_status")));
+
                 return payment;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return null;

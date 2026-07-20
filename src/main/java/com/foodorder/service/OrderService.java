@@ -40,7 +40,7 @@ public class OrderService {
 
         for (CartItem cartItem : cartItems) {
             MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId());
-            double priceAfterDiscount = menuItem.getPrice()- (menuItem.getPrice() * menuItem.getDiscount() / 100);
+            double priceAfterDiscount = menuItem.getPrice() - (menuItem.getPrice() * menuItem.getDiscount() / 100);
             subtotal += priceAfterDiscount * cartItem.getQuantity();
         }
 
@@ -61,7 +61,6 @@ public class OrderService {
 
         orderRepository.save(order);
 
-        // Apply best discount
         Discount discount = new DiscountService().getBestDiscount(subtotal);
 
         double discountAmount = 0;
@@ -71,10 +70,8 @@ public class OrderService {
             order.setDiscount(discountAmount);
         }
 
-        // IMPORTANT: Update order after discount calculation
         orderRepository.update(order);
 
-        // Create payment
         Payment payment = new Payment(
                 order.getId(),
                 subtotal - discountAmount + deliveryCharge,
@@ -82,9 +79,8 @@ public class OrderService {
                 PaymentStatus.PENDING
         );
 
-        new PaymentService().createPayment(payment);
+        payment = new PaymentService().createPayment(payment);
 
-        // Generate OTP
         String otp = OTPGenerator.generateOTP();
 
         new OrderOTPRepository().save(
@@ -95,7 +91,6 @@ public class OrderService {
                 )
         );
 
-        // Add Order Placed Log
         new OrderLogService().addLog(
                 new OrderLog(
                         order.getId(),
@@ -105,7 +100,6 @@ public class OrderService {
                 )
         );
 
-        // Save Order Items
         for (CartItem cartItem : cartItems) {
             MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId());
 
@@ -119,11 +113,7 @@ public class OrderService {
             orderItemRepository.save(orderItem);
         }
 
-        // Clear Cart Items
-        List<CartItem> allCartItems = cartItemRepository.findAll();
-        allCartItems.removeIf(item -> item.getCartId().equals(cart.getId()));
-
-        FileUtil.writeData(FileConstants.CART_ITEMS_FILE, allCartItems);
+        cartItemRepository.deleteByCartId(cart.getId());
 
         return order;
     }

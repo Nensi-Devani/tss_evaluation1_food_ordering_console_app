@@ -1,28 +1,44 @@
 package com.foodorder.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.database.DatabaseConnection;
 import com.foodorder.exception.OrderItemNotFoundException;
 import com.foodorder.model.OrderItem;
 import com.foodorder.util.FileUtil;
 import com.foodorder.util.IdGenerator;
 
 public class OrderItemRepository {
+    Connection connection;
+    PreparedStatement preparedStatement;
 
-    public void save(OrderItem orderItem) {
-        List<OrderItem> orderItems = FileUtil.readData(FileConstants.ORDER_ITEMS_FILE);
+    public OrderItemRepository(){
+        connection = DatabaseConnection.getInstance().getConnection();
+    }
 
-        orderItem.setId(IdGenerator.generateId(
-                FileConstants.ORDER_ITEMS_FILE,
-                IdConstants.ORDER_ITEM_ID_PREFIX));
+    public void save(OrderItem orderItem)   {
+        String query = "INSERT INTO order_items (order_id, menu_item_id, price, discount, quantity) VALUES (?, ?, ?, ?, ?)";
 
-        orderItems.add(orderItem);
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-        FileUtil.writeData(FileConstants.ORDER_ITEMS_FILE, orderItems);
+            preparedStatement.setLong(1, Long.parseLong(orderItem.getOrderId()));
+            preparedStatement.setLong(2, Long.parseLong(orderItem.getMenuItemId()));
+            preparedStatement.setDouble(3, orderItem.getPrice());
+            preparedStatement.setDouble(4, orderItem.getDiscount());
+            preparedStatement.setInt(5, orderItem.getQuantity());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(OrderItem orderItem) {

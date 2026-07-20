@@ -56,14 +56,28 @@ public class CartItemRepository {
     }
 
     public CartItem findById(String id) {
-        List<CartItem> cartItems = FileUtil.readData(FileConstants.CART_ITEMS_FILE);
+        String query = "SELECT * FROM cart_items WHERE cart_item_id = ?";
 
-        for (CartItem cartItem : cartItems) {
-            if (cartItem.getId().equals(id))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(id));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                CartItem cartItem = new CartItem();
+
+                cartItem.setId(String.valueOf(resultSet.getLong("cart_item_id")));
+                cartItem.setCartId(String.valueOf(resultSet.getLong("cart_id")));
+                cartItem.setMenuItemId(String.valueOf(resultSet.getLong("menu_item_id")));
+                cartItem.setQuantity(resultSet.getInt("quantity"));
+
                 return cartItem;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
-        throw new CartItemNotFoundException(MessageConstants.CART_ITEM_NOT_FOUND);
+        return null;
     }
 
     public List<CartItem> findByCartId(String cartId) {
@@ -91,6 +105,32 @@ public class CartItemRepository {
         }
 
         return cartItemsByCart;
+    }
+
+    public void delete(String cartItemId) {
+        String query = "DELETE FROM cart_items WHERE cart_item_id = ?";
+
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(cartItemId));
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public void deleteByCartId(String cartId) {
+        String query = "DELETE FROM cart_items WHERE cart_id = ?";
+
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(cartId));
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public List<CartItem> findAll() {

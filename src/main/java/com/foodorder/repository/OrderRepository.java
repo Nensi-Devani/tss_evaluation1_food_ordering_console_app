@@ -148,16 +148,45 @@ public class OrderRepository {
     }
 
     public List<Order> findByRestaurantId(String restaurantId) {
-        List<Order> restaurantOrders = new ArrayList<>();
+        List<Order> orders = new ArrayList<>();
 
-        List<Order> orders = FileUtil.readData(FileConstants.ORDERS_FILE);
+        String query = "SELECT * FROM orders WHERE restaurant_id = ?";
 
-        for (Order order : orders) {
-            if (order.getRestaurantId().equals(restaurantId))
-                restaurantOrders.add(order);
+        try {
+            preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setLong(1, Long.parseLong(restaurantId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Order order = new Order();
+
+                order.setId(String.valueOf(resultSet.getLong("order_id")));
+                order.setCustomerId(String.valueOf(resultSet.getLong("customer_id")));
+                order.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+
+                long deliveryBoyId = resultSet.getLong("delivery_boy_id");
+
+                if (!resultSet.wasNull()) {
+                    order.setDeliveryBoyId(
+                            String.valueOf(deliveryBoyId)
+                    );
+                }
+
+                order.setOrderDateTime(resultSet.getTimestamp("order_date_time").toLocalDateTime());
+                order.setSubtotal(resultSet.getDouble("sub_total"));
+                order.setDiscount(resultSet.getDouble("discount"));
+                order.setDeliveryCharge(resultSet.getDouble("delivery_charge"));
+                order.setPaymentType(PaymentType.valueOf(resultSet.getString("payment_type")));
+                order.setOrderState(getOrderState(resultSet.getString("order_status")));
+
+                orders.add(order);
+            }
+        } catch(SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
-        return restaurantOrders;
+        return orders;
     }
 
     public List<Order> findByDeliveryBoyId(String deliveryBoyId) {

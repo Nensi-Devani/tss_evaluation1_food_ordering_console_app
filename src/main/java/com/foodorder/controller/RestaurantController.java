@@ -61,7 +61,7 @@ public class RestaurantController {
             return;
         }
 
-        List<Order> orders = new OrderRepository().findAll();
+        List<Order> orders = new OrderRepository().findByRestaurantId(restaurant.getId());
 
         int totalOrders = 0;
         double todayAmount = 0;
@@ -117,7 +117,7 @@ public class RestaurantController {
 
     private void viewOrders(User user) {
         Restaurant restaurant = restaurantRepository.findByOwnerId(user.getId());
-        List<Order> orders = new OrderRepository().findAll();
+        List<Order> orders = new OrderRepository().findByRestaurantId(restaurant.getId());
 
         System.out.println();
 

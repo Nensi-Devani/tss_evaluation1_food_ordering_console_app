@@ -1,28 +1,42 @@
 package com.foodorder.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.foodorder.constants.FileConstants;
-import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.database.DatabaseConnection;
 import com.foodorder.exception.CartItemNotFoundException;
 import com.foodorder.model.CartItem;
 import com.foodorder.util.FileUtil;
-import com.foodorder.util.IdGenerator;
 
 public class CartItemRepository {
+    Connection connection;
+    PreparedStatement preparedStatement;
+
+    public CartItemRepository(){
+        connection = DatabaseConnection
+                        .getInstance()
+                        .getConnection();
+    }
 
     public void save(CartItem cartItem) {
-        List<CartItem> cartItems = FileUtil.readData(FileConstants.CART_ITEMS_FILE);
+        String query = "INSERT INTO cart_items (cart_id, menu_item_id, quantity) VALUES (?, ?, ?)";
 
-        cartItem.setId(IdGenerator.generateId(
-                FileConstants.CART_ITEMS_FILE,
-                IdConstants.CART_ITEM_ID_PREFIX));
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-        cartItems.add(cartItem);
+            preparedStatement.setLong(1, Long.parseLong(cartItem.getCartId()));
+            preparedStatement.setLong(2, Long.parseLong(cartItem.getMenuItemId()));
+            preparedStatement.setInt(3, cartItem.getQuantity());
 
-        FileUtil.writeData(FileConstants.CART_ITEMS_FILE, cartItems);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(CartItem cartItem) {

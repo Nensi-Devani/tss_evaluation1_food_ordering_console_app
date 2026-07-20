@@ -1,19 +1,32 @@
 package com.foodorder.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
-import com.foodorder.enums.OrderStatus;
+import com.foodorder.database.DatabaseConnection;
+import com.foodorder.enums.PaymentType;
 import com.foodorder.exception.OrderNotFoundException;
 import com.foodorder.model.Order;
-import com.foodorder.state.OrderState;
+import com.foodorder.state.*;
 import com.foodorder.util.FileUtil;
 import com.foodorder.util.IdGenerator;
 
 public class OrderRepository {
+    Connection connection;
+    PreparedStatement preparedStatement;
+
+    public OrderRepository(){
+        connection = DatabaseConnection
+                        .getInstance()
+                        .getConnection();
+    }
 
     public void save(Order order) {
         List<Order> orders = FileUtil.readData(FileConstants.ORDERS_FILE);
@@ -105,7 +118,65 @@ public class OrderRepository {
         return filteredOrders;
     }
 
+    private OrderState getOrderState(String state) {
+        switch (state) {
+            case "PLACED":
+                return new PlacedState();
+
+            case "PREPARING":
+                return new PreparingState();
+
+            case "READY":
+                return new ReadyState();
+
+            case "OUT_FOR_DELIVERY":
+                return new OutForDeliveryState();
+
+            case "DELIVERED":
+                return new DeliveredState();
+
+            case "CANCELLED":
+                return new CancelledState();
+
+            default:
+                throw new RuntimeException("Invalid order state : " + state);
+        }
+    }
+
     public List<Order> findAll() {
-        return FileUtil.readData(FileConstants.ORDERS_FILE);
+        List<Order> orders = new ArrayList<>();
+
+        String query = "SELECT * FROM orders";
+
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Order order = new Order();
+
+                order.setId(String.valueOf(resultSet.getLong("order_id")));
+                order.setCustomerId(String.valueOf(resultSet.getLong("customer_id")));
+                order.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+
+                long deliveryBoyId = resultSet.getLong("delivery_boy_id");
+                if (!resultSet.wasNull()) {
+                    order.setDeliveryBoyId(String.valueOf(deliveryBoyId));
+                }
+
+                order.setOrderDateTime(resultSet.getTimestamp("order_date_time").toLocalDateTime());
+                order.setSubtotal(resultSet.getDouble("sub_total"));
+                order.setDiscount(resultSet.getDouble("discount"));
+                order.setDeliveryCharge(resultSet.getDouble("delivery_charge"));
+                order.setPaymentType(PaymentType.valueOf(resultSet.getString("payment_type")));
+                order.setOrderState(getOrderState(resultSet.getString("order_status")));
+
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return orders;
     }
 }

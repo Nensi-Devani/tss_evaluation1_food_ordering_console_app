@@ -15,6 +15,9 @@ public class Payment implements Serializable, Identifiable {
     private PaymentType paymentType;
     private PaymentStatus paymentStatus;
 
+    public Payment(){
+    }
+
     public Payment(String orderId, double amount, PaymentType paymentType, PaymentStatus paymentStatus) {
         this.orderId = orderId;
         this.amount = amount;

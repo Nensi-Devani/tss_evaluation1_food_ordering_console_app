@@ -13,6 +13,9 @@ public class OrderOTP implements Serializable, Identifiable {
     private String otp;
     private LocalDateTime generatedAt;
 
+    public OrderOTP(){
+    }
+
     public OrderOTP(String orderId, String otp, LocalDateTime generatedAt) {
         this.orderId = orderId;
         this.otp = otp;

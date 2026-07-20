@@ -14,6 +14,9 @@ public class UserAddress implements Serializable, Identifiable {
     private String city;
     private String pincode;
 
+    public UserAddress(){
+    }
+
     public UserAddress(String userId, String mobileNumber, String address, String city, String pincode) {
         this.userId = userId;
         this.mobileNumber = mobileNumber;

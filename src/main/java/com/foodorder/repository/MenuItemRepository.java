@@ -57,11 +57,29 @@ public class MenuItemRepository {
     }
 
     public MenuItem findById(String id) {
-        List<MenuItem> menuItems = FileUtil.readData(FileConstants.MENU_ITEMS_FILE);
+        String query = "SELECT * FROM menu_items WHERE menu_item_id = ?";
 
-        for (MenuItem menuItem : menuItems) {
-            if (menuItem.getId().equals(id))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(id));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                MenuItem menuItem = new MenuItem();
+
+                menuItem.setId(String.valueOf(resultSet.getLong("menu_item_id")));
+                menuItem.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+                menuItem.setName(resultSet.getString("name"));
+                menuItem.setPrice(resultSet.getDouble("price"));
+                menuItem.setDiscount(resultSet.getDouble("discount"));
+                menuItem.setFoodType(FoodType.valueOf(resultSet.getString("food_type")));
+                menuItem.setFoodCategory(FoodCategory.valueOf(resultSet.getString("food_category")));
+                menuItem.setStatus(Status.valueOf(resultSet.getString("status")));
+
                 return menuItem;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         throw new MenuItemNotFoundException(MessageConstants.MENU_ITEM_NOT_FOUND);

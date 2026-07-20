@@ -2,6 +2,7 @@ package com.foodorder.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,11 +69,25 @@ public class CartItemRepository {
     public List<CartItem> findByCartId(String cartId) {
         List<CartItem> cartItemsByCart = new ArrayList<>();
 
-        List<CartItem> cartItems = FileUtil.readData(FileConstants.CART_ITEMS_FILE);
+        String query = "SELECT * FROM cart_items WHERE cart_id = ?";
 
-        for (CartItem cartItem : cartItems) {
-            if (cartItem.getCartId().equals(cartId))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(cartId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                CartItem cartItem = new CartItem();
+
+                cartItem.setId(String.valueOf(resultSet.getLong("cart_item_id")));
+                cartItem.setCartId(String.valueOf(resultSet.getLong("cart_id")));
+                cartItem.setMenuItemId(String.valueOf(resultSet.getLong("menu_item_id")));
+                cartItem.setQuantity(resultSet.getInt("quantity"));
+
                 cartItemsByCart.add(cartItem);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return cartItemsByCart;

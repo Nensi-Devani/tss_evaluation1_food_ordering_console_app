@@ -1,6 +1,7 @@
 package com.foodorder.model;
 
 import com.foodorder.common.Identifiable;
+import com.foodorder.enums.OrderStatus;
 import com.foodorder.enums.PaymentType;
 import com.foodorder.state.OrderState;
 
@@ -21,6 +22,9 @@ public class Order implements Serializable, Identifiable {
     private double deliveryCharge;
     private PaymentType paymentType;
     private OrderState orderState;
+
+    public Order(){
+    }
 
     public Order(String customerId, String restaurantId, String deliveryBoyId, LocalDateTime orderDateTime, double subtotal, double discount, double deliveryCharge, PaymentType paymentType, OrderState orderState) {
         this.customerId = customerId;

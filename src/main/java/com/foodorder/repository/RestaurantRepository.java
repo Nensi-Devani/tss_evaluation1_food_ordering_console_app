@@ -1,15 +1,14 @@
 package com.foodorder.repository;
 
-import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.MessageConstants;
 import com.foodorder.database.DatabaseConnection;
 import com.foodorder.enums.Status;
 import com.foodorder.exception.RestaurantNotFoundException;
 import com.foodorder.model.Restaurant;
-import com.foodorder.util.FileUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,54 +41,133 @@ public class RestaurantRepository {
     }
 
     public void update(Restaurant restaurant) {
-        List<Restaurant> restaurants = FileUtil.readData(FileConstants.RESTAURANTS_FILE);
+        String query = "UPDATE restaurants SET name = ?, status = ? WHERE restaurant_id = ?";
 
-        for (int i = 0; i < restaurants.size(); i++) {
-            if (restaurants.get(i).getId().equals(restaurant.getId())) {
-                restaurants.set(i, restaurant);
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-                FileUtil.writeData(FileConstants.RESTAURANTS_FILE, restaurants);
-                return;
+            preparedStatement.setString(1, restaurant.getName());
+            preparedStatement.setString(2, restaurant.getStatus().name());
+            preparedStatement.setInt(3, Integer.parseInt(restaurant.getId()));
+
+            int rowsUpdated = preparedStatement.executeUpdate();
+
+            if (rowsUpdated == 0) {
+                throw new RestaurantNotFoundException(MessageConstants.RESTAURANT_NOT_FOUND);
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        throw new RestaurantNotFoundException(MessageConstants.RESTAURANT_NOT_FOUND);
     }
 
     public Restaurant findById(String id) {
-        List<Restaurant> restaurants = FileUtil.readData(FileConstants.RESTAURANTS_FILE);
+        String query = "SELECT * FROM restaurants WHERE restaurant_id = ?";
 
-        for (Restaurant restaurant : restaurants) {
-            if (restaurant.getId().equals(id))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, Integer.parseInt(id));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                Restaurant restaurant = new Restaurant();
+
+                restaurant.setId(String.valueOf(resultSet.getInt("restaurant_id")));
+                restaurant.setOwnerId(String.valueOf(resultSet.getInt("owner_id")));
+                restaurant.setName(resultSet.getString("name"));
+                restaurant.setStatus(Status.valueOf(resultSet.getString("status")));
+                restaurant.setMobileNumber(resultSet.getString("mobile_no"));
+                restaurant.setCity(resultSet.getString("city"));
+
                 return restaurant;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         throw new RestaurantNotFoundException(MessageConstants.RESTAURANT_NOT_FOUND);
     }
 
     public Restaurant findByOwnerId(String ownerId) {
-        List<Restaurant> restaurants = FileUtil.readData(FileConstants.RESTAURANTS_FILE);
+        String query = "SELECT * FROM restaurants WHERE owner_id = ?";
 
-        for (Restaurant restaurant : restaurants) {
-            if (restaurant.getOwnerId().equals(ownerId))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, Integer.parseInt(ownerId));
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                Restaurant restaurant = new Restaurant();
+
+                restaurant.setId(String.valueOf(resultSet.getInt("restaurant_id")));
+                restaurant.setOwnerId(String.valueOf(resultSet.getInt("owner_id")));
+                restaurant.setName(resultSet.getString("name"));
+                restaurant.setStatus(Status.valueOf(resultSet.getString("status")));
+                restaurant.setMobileNumber(resultSet.getString("mobile_no"));
+                restaurant.setCity(resultSet.getString("city"));
+
                 return restaurant;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return null;
     }
 
     public List<Restaurant> findAll() {
-        return FileUtil.readData(FileConstants.RESTAURANTS_FILE);
+        List<Restaurant> restaurants = new ArrayList<>();
+
+        String query = "SELECT * FROM restaurants";
+
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Restaurant restaurant = new Restaurant();
+
+                restaurant.setId(String.valueOf(resultSet.getInt("restaurant_id")));
+                restaurant.setOwnerId(String.valueOf(resultSet.getInt("owner_id")));
+                restaurant.setName(resultSet.getString("name"));
+                restaurant.setStatus(Status.valueOf(resultSet.getString("status")));
+                restaurant.setMobileNumber(resultSet.getString("mobile_no"));
+                restaurant.setCity(resultSet.getString("city"));
+
+                restaurants.add(restaurant);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return restaurants;
     }
 
     public List<Restaurant> findAllActive() {
         List<Restaurant> activeRestaurants = new ArrayList<>();
 
-        List<Restaurant> restaurants = FileUtil.readData(FileConstants.RESTAURANTS_FILE);
+        String query = "SELECT * FROM restaurants WHERE status = ?";
 
-        for (Restaurant restaurant : restaurants) {
-            if (restaurant.getStatus() == Status.ACTIVE)
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, Status.ACTIVE.name());
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Restaurant restaurant = new Restaurant();
+
+                restaurant.setId(String.valueOf(resultSet.getInt("restaurant_id")));
+                restaurant.setOwnerId(String.valueOf(resultSet.getInt("owner_id")));
+                restaurant.setName(resultSet.getString("name"));
+                restaurant.setStatus(Status.valueOf(resultSet.getString("status")));
+                restaurant.setMobileNumber(resultSet.getString("mobile_no"));
+                restaurant.setCity(resultSet.getString("city"));
+
                 activeRestaurants.add(restaurant);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return activeRestaurants;
@@ -98,11 +176,27 @@ public class RestaurantRepository {
     public List<Restaurant> findAllInactive() {
         List<Restaurant> inactiveRestaurants = new ArrayList<>();
 
-        List<Restaurant> restaurants = FileUtil.readData(FileConstants.RESTAURANTS_FILE);
+        String query = "SELECT * FROM restaurants WHERE status = ?";
 
-        for (Restaurant restaurant : restaurants)
-            if (restaurant.getStatus() == Status.INACTIVE) {
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, Status.INACTIVE.name());
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Restaurant restaurant = new Restaurant();
+
+                restaurant.setId(String.valueOf(resultSet.getInt("restaurant_id")));
+                restaurant.setOwnerId(String.valueOf(resultSet.getInt("owner_id")));
+                restaurant.setName(resultSet.getString("name"));
+                restaurant.setStatus(Status.valueOf(resultSet.getString("status")));
+                restaurant.setMobileNumber(resultSet.getString("mobile_no"));
+                restaurant.setCity(resultSet.getString("city"));
+
                 inactiveRestaurants.add(restaurant);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return inactiveRestaurants;

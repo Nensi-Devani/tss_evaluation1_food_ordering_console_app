@@ -19,6 +19,9 @@ public class MenuItem implements Serializable, Identifiable {
     private FoodCategory foodCategory;
     private Status status;
 
+    public MenuItem(){
+    }
+
     public MenuItem(String restaurantId, String name, double price, double discount, FoodType foodType, FoodCategory foodCategory, Status status) {
         this.restaurantId = restaurantId;
         this.name = name;

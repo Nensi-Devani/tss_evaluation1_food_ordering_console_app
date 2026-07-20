@@ -11,6 +11,9 @@ public class Cart implements Serializable, Identifiable {
     private String customerId;
     private String restaurantId;
 
+    public Cart(){
+    }
+
     public Cart(String customerId, String restaurantId) {
         this.customerId = customerId;
         this.restaurantId = restaurantId;

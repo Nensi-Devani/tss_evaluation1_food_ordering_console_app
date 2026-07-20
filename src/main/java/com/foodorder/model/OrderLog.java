@@ -15,6 +15,9 @@ public class OrderLog implements Serializable, Identifiable {
     private String actionBy;
     private LocalDateTime actionDateTime;
 
+    public OrderLog(){
+    }
+
     public OrderLog(String orderId, OrderLogAction action, String actionBy, LocalDateTime actionDateTime) {
         this.orderId = orderId;
         this.action = action;

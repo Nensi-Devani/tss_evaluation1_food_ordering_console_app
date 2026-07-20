@@ -3,16 +3,32 @@ package com.foodorder.repository;
 import com.foodorder.constants.FileConstants;
 import com.foodorder.constants.IdConstants;
 import com.foodorder.constants.MessageConstants;
+import com.foodorder.database.DatabaseConnection;
+import com.foodorder.enums.FoodCategory;
+import com.foodorder.enums.FoodType;
 import com.foodorder.enums.Status;
 import com.foodorder.exception.MenuItemNotFoundException;
 import com.foodorder.model.MenuItem;
 import com.foodorder.util.FileUtil;
 import com.foodorder.util.IdGenerator;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MenuItemRepository {
+    Connection connection;
+    PreparedStatement preparedStatement;
+
+    public MenuItemRepository(){
+        connection = DatabaseConnection
+                        .getInstance()
+                        .getConnection();
+    }
+
     public void save(MenuItem menuItem) {
         List<MenuItem> menuItems = FileUtil.readData(FileConstants.MENU_ITEMS_FILE);
 
@@ -54,11 +70,29 @@ public class MenuItemRepository {
     public List<MenuItem> findByRestaurantId(String restaurantId) {
         List<MenuItem> restaurantMenuItems = new ArrayList<>();
 
-        List<MenuItem> menuItems = FileUtil.readData(FileConstants.MENU_ITEMS_FILE);
+        String query = "SELECT * FROM menu_items WHERE restaurant_id = ?";
 
-        for (MenuItem menuItem : menuItems) {
-            if (menuItem.getRestaurantId().equals(restaurantId))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, Integer.parseInt(restaurantId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                MenuItem menuItem = new MenuItem();
+
+                menuItem.setId(String.valueOf(resultSet.getInt("menu_item_id")));
+                menuItem.setRestaurantId(String.valueOf(resultSet.getInt("restaurant_id")));
+                menuItem.setName(resultSet.getString("name"));
+                menuItem.setPrice(resultSet.getDouble("price"));
+                menuItem.setDiscount(resultSet.getDouble("discount"));
+                menuItem.setFoodType(FoodType.valueOf(resultSet.getString("food_type")));
+                menuItem.setFoodCategory(FoodCategory.valueOf(resultSet.getString("food_category")));
+                menuItem.setStatus(Status.valueOf(resultSet.getString("status")));
+
                 restaurantMenuItems.add(menuItem);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return restaurantMenuItems;

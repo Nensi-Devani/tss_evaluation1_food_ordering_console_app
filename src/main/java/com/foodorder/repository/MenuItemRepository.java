@@ -12,10 +12,7 @@ import com.foodorder.model.MenuItem;
 import com.foodorder.util.FileUtil;
 import com.foodorder.util.IdGenerator;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,30 +27,54 @@ public class MenuItemRepository {
     }
 
     public void save(MenuItem menuItem) {
-        List<MenuItem> menuItems = FileUtil.readData(FileConstants.MENU_ITEMS_FILE);
+        String query = "INSERT INTO menu_items (restaurant_id, name, price, discount, food_type, food_category, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        menuItem.setId(IdGenerator.generateId(
-                FileConstants.MENU_ITEMS_FILE,
-                IdConstants.MENU_ITEM_ID_PREFIX));
+        try {
+            preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
-        menuItems.add(menuItem);
+            preparedStatement.setLong(1, Long.parseLong(menuItem.getRestaurantId()));
+            preparedStatement.setString(2, menuItem.getName());
+            preparedStatement.setDouble(3, menuItem.getPrice());
+            preparedStatement.setDouble(4, menuItem.getDiscount());
+            preparedStatement.setString(5, menuItem.getFoodType().name());
+            preparedStatement.setString(6, menuItem.getFoodCategory().name());
+            preparedStatement.setString(7, menuItem.getStatus().name());
 
-        FileUtil.writeData(FileConstants.MENU_ITEMS_FILE, menuItems);
+            preparedStatement.executeUpdate();
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                menuItem.setId(String.valueOf(resultSet.getLong(1)));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public void update(MenuItem menuItem) {
-        List<MenuItem> menuItems = FileUtil.readData(FileConstants.MENU_ITEMS_FILE);
+        String query = "UPDATE menu_items SET restaurant_id=?, name=?, price=?, discount=?, food_type=?, food_category=?, status=? WHERE menu_item_id=?";
 
-        for (int i = 0; i < menuItems.size(); i++) {
-            if (menuItems.get(i).getId().equals(menuItem.getId())) {
-                menuItems.set(i, menuItem);
+        try {
+            preparedStatement = connection.prepareStatement(query);
 
-                FileUtil.writeData(FileConstants.MENU_ITEMS_FILE, menuItems);
-                return;
+            preparedStatement.setLong(1, Long.parseLong(menuItem.getRestaurantId()));
+            preparedStatement.setString(2, menuItem.getName());
+            preparedStatement.setDouble(3, menuItem.getPrice());
+            preparedStatement.setDouble(4, menuItem.getDiscount());
+            preparedStatement.setString(5, menuItem.getFoodType().name());
+            preparedStatement.setString(6, menuItem.getFoodCategory().name());
+            preparedStatement.setString(7, menuItem.getStatus().name());
+            preparedStatement.setLong(8, Long.parseLong(menuItem.getId()));
+
+            int rows = preparedStatement.executeUpdate();
+
+            if (rows == 0) {
+                throw new MenuItemNotFoundException(MessageConstants.MENU_ITEM_NOT_FOUND);
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        throw new MenuItemNotFoundException(MessageConstants.MENU_ITEM_NOT_FOUND);
     }
 
     public MenuItem findById(String id) {
@@ -147,11 +168,31 @@ public class MenuItemRepository {
     }
 
     public MenuItem findByRestaurantIdAndName(String restaurantId, String name) {
-        List<MenuItem> menuItems = FileUtil.readData(FileConstants.MENU_ITEMS_FILE);
+        String query = "SELECT * FROM menu_items WHERE restaurant_id = ? AND LOWER(name) = LOWER(?)";
 
-        for (MenuItem menuItem : menuItems) {
-            if (menuItem.getRestaurantId().equals(restaurantId) && menuItem.getName().equalsIgnoreCase(name))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setLong(1, Long.parseLong(restaurantId));
+            preparedStatement.setString(2, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                MenuItem menuItem = new MenuItem();
+
+                menuItem.setId(String.valueOf(resultSet.getLong("menu_item_id")));
+                menuItem.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+                menuItem.setName(resultSet.getString("name"));
+                menuItem.setPrice(resultSet.getDouble("price"));
+                menuItem.setDiscount(resultSet.getDouble("discount"));
+                menuItem.setFoodType(FoodType.valueOf(resultSet.getString("food_type")));
+                menuItem.setFoodCategory(FoodCategory.valueOf(resultSet.getString("food_category")));
+                menuItem.setStatus(Status.valueOf(resultSet.getString("status")));
+
                 return menuItem;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return null;

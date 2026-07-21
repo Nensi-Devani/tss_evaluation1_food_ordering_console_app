@@ -219,7 +219,7 @@ public class OrderService {
                 new OrderLog(
                         orderId,
                         OrderLogAction.DELIVERY_BOY_ASSIGNED,
-                        order.getDeliveryBoyId(),
+                        restaurantOwnerId,
                         LocalDateTime.now()
                 )
         );
@@ -228,7 +228,7 @@ public class OrderService {
                 new OrderLog(
                         orderId,
                         OrderLogAction.ORDER_OUT_FOR_DELIVERY,
-                        restaurantOwnerId,
+                        order.getDeliveryBoyId(),
                         LocalDateTime.now()
                 )
         );

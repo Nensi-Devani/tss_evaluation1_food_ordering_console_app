@@ -50,7 +50,7 @@ public class OrderRepository {
     }
 
     public void update(Order order) {
-        String query = "UPDATE orders SET sub_total=?, discount=?, delivery_charge=?, payment_type=?, order_status=? WHERE order_id=?";
+        String query = "UPDATE orders SET sub_total=?, discount=?, delivery_charge=?, payment_type=?, order_status=?, delivery_boy_id=? WHERE order_id=?";
 
         try {
             preparedStatement = connection.prepareStatement(query);
@@ -60,7 +60,8 @@ public class OrderRepository {
             preparedStatement.setDouble(3, order.getDeliveryCharge());
             preparedStatement.setString(4, order.getPaymentType().name());
             preparedStatement.setString(5, order.getOrderState().getStatus());
-            preparedStatement.setLong(6, Long.parseLong(order.getId()));
+            preparedStatement.setInt(6,Integer.parseInt(order.getDeliveryBoyId()));
+            preparedStatement.setLong(7, Long.parseLong(order.getId()));
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

@@ -37,10 +37,12 @@ public class OrderService {
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
 
         double subtotal = 0;
+        double totalDiscount = 0;
 
         for (CartItem cartItem : cartItems) {
             MenuItem menuItem = menuItemRepository.findById(cartItem.getMenuItemId());
-            double priceAfterDiscount = menuItem.getPrice() - (menuItem.getPrice() * menuItem.getDiscount() / 100);
+            totalDiscount += (menuItem.getPrice() * menuItem.getDiscount()) / 100;
+            double priceAfterDiscount = menuItem.getPrice() - ((menuItem.getPrice() * menuItem.getDiscount()) / 100);
             subtotal += priceAfterDiscount * cartItem.getQuantity();
         }
 
@@ -50,7 +52,7 @@ public class OrderService {
                 null,
                 LocalDateTime.now(),
                 subtotal,
-                0,
+                totalDiscount,
                 deliveryCharge,
                 paymentType,
                 null
@@ -61,22 +63,13 @@ public class OrderService {
 
         orderRepository.save(order);
 
-        Discount discount = new DiscountService().getBestDiscount(subtotal);
-
-        double discountAmount = 0;
-
-        if (discount != null) {
-            discountAmount = subtotal * discount.getDiscountPercentage() / 100;
-            order.setDiscount(discountAmount);
-        }
-
-        orderRepository.update(order);
+        PaymentStatus paymentStatus = (paymentType == PaymentType.CASH) ? PaymentStatus.PENDING: PaymentStatus.SUCCESS;
 
         Payment payment = new Payment(
                 order.getId(),
-                subtotal - discountAmount + deliveryCharge,
+                subtotal + deliveryCharge,
                 paymentType,
-                PaymentStatus.PENDING
+                paymentStatus
         );
 
         payment = new PaymentService().createPayment(payment);

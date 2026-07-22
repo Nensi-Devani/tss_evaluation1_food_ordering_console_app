@@ -70,7 +70,17 @@ public class OrderLogRepository {
     public List<OrderLog> findByOrderId(String orderId) {
         List<OrderLog> filteredLogs = new ArrayList<>();
 
-        String query = "SELECT * FROM order_logs WHERE order_id = ?";
+//        String query = "SELECT * FROM order_logs WHERE order_id = ?";
+        String query = "SELECT\n" +
+                "        ol.order_log_id,\n" +
+                "        ol.order_id,\n" +
+                "        ol.action,\n" +
+                "        u.name AS action_taken_by_name,\n" +
+                "        ol.action_date_time\n" +
+                "    FROM order_logs ol\n" +
+                "    JOIN users u\n" +
+                "        ON ol.action_taken_by = u.user_id\n" +
+                "    WHERE ol.order_id = ?";
 
         try {
             preparedStatement = connection.prepareStatement(query);
@@ -83,7 +93,7 @@ public class OrderLogRepository {
                 orderLog.setId(String.valueOf(resultSet.getLong("order_log_id")));
                 orderLog.setOrderId(String.valueOf(resultSet.getLong("order_id")));
                 orderLog.setAction(OrderLogAction.valueOf(resultSet.getString("action")));
-                orderLog.setActionBy(String.valueOf(resultSet.getLong("action_taken_by")));
+                orderLog.setActionBy(String.valueOf(resultSet.getString("action_taken_by_name")));
                 orderLog.setActionDateTime(
                         resultSet.getTimestamp("action_date_time").toLocalDateTime()
                 );

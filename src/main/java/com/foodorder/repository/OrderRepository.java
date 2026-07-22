@@ -270,7 +270,25 @@ public class OrderRepository {
     public List<Order> findAll() {
         List<Order> orders = new ArrayList<>();
 
-        String query = "SELECT * FROM orders";
+//        String query = "SELECT * FROM orders";
+        String query = "SELECT\n" +
+                "    o.order_id,\n" +
+                "    c.name AS customer_name,\n" +
+                "    r.name AS restaurant_name,\n" +
+                "    d.name AS delivery_boy_name,\n" +
+                "    o.order_date_time,\n" +
+                "    o.sub_total,\n" +
+                "    o.discount,\n" +
+                "    o.delivery_charge,\n" +
+                "    o.payment_type,\n" +
+                "    o.order_status\n" +
+                "FROM orders o\n" +
+                "JOIN users c\n" +
+                "    ON o.customer_id = c.user_id\n" +
+                "JOIN restaurants r\n" +
+                "    ON o.restaurant_id = r.restaurant_id\n" +
+                "LEFT JOIN users d\n" +
+                "    ON o.delivery_boy_id = d.user_id";
 
         try {
             preparedStatement = connection.prepareStatement(query);
@@ -280,12 +298,12 @@ public class OrderRepository {
                 Order order = new Order();
 
                 order.setId(String.valueOf(resultSet.getLong("order_id")));
-                order.setCustomerId(String.valueOf(resultSet.getLong("customer_id")));
-                order.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+                order.setCustomerId(resultSet.getString("customer_name"));
+                order.setRestaurantId(resultSet.getString("restaurant_name"));
 
-                long deliveryBoyId = resultSet.getLong("delivery_boy_id");
+                String deliveryBoy = resultSet.getString("delivery_boy_name");
                 if (!resultSet.wasNull()) {
-                    order.setDeliveryBoyId(String.valueOf(deliveryBoyId));
+                    order.setDeliveryBoyId(deliveryBoy);
                 }
 
                 order.setOrderDateTime(resultSet.getTimestamp("order_date_time").toLocalDateTime());

@@ -193,11 +193,37 @@ public class OrderRepository {
     public List<Order> findByDeliveryBoyId(String deliveryBoyId) {
         List<Order> deliveryOrders = new ArrayList<>();
 
-        List<Order> orders = FileUtil.readData(FileConstants.ORDERS_FILE);
+        String query = "SELECT * FROM orders WHERE delivery_boy_id = ?";
 
-        for (Order order : orders) {
-            if (deliveryBoyId.equals(order.getDeliveryBoyId()))
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(deliveryBoyId));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Order order = new Order();
+
+                order.setId(String.valueOf(resultSet.getLong("order_id")));
+                order.setCustomerId(String.valueOf(resultSet.getLong("customer_id")));
+                order.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+
+                long dbId = resultSet.getLong("delivery_boy_id");
+
+                if (!resultSet.wasNull()) {
+                    order.setDeliveryBoyId(String.valueOf(dbId));
+                }
+
+                order.setOrderDateTime(resultSet.getTimestamp("order_date_time").toLocalDateTime());
+                order.setSubtotal(resultSet.getDouble("sub_total"));
+                order.setDiscount(resultSet.getDouble("discount"));
+                order.setDeliveryCharge(resultSet.getDouble("delivery_charge"));
+                order.setPaymentType(PaymentType.valueOf(resultSet.getString("payment_type")));
+                order.setOrderState(getOrderState(resultSet.getString("order_status")));
+
                 deliveryOrders.add(order);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         return deliveryOrders;

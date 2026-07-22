@@ -24,9 +24,8 @@ public class AdminController {
             System.out.println("==============================");
             System.out.println("1. Manage Users");
             System.out.println("2. Manage Restaurants");
-            System.out.println("3. Manage Discounts");
-            System.out.println("4. View Orders");
-            System.out.println("5. Trace Order");
+            System.out.println("3. View Orders");
+            System.out.println("4. Trace Order");
             System.out.println("0. Logout");
             System.out.print("Choice : ");
 
@@ -42,14 +41,10 @@ public class AdminController {
                     break;
 
                 case 3:
-                    manageDiscounts();
-                    break;
-
-                case 4:
                     viewOrders();
                     break;
 
-                case 5:
+                case 4:
                     traceOrder();
                     break;
 
@@ -373,111 +368,6 @@ public class AdminController {
         System.out.println("============================================================================================================================");
     }
 
-    private void manageDiscounts() {
-        while (true) {
-            System.out.println("\n------ DISCOUNT MANAGEMENT ------");
-            System.out.println("1. Add Discount");
-            System.out.println("2. View Discounts");
-            System.out.println("3. Activate Discount");
-            System.out.println("4. Deactivate Discount");
-            System.out.println("0. Back");
-
-            int choice = Integer.parseInt(sc.nextLine());
-
-            switch (choice) {
-                case 1:
-                    addDiscount();
-                    break;
-
-                case 2:
-                    viewDiscounts();
-                    break;
-
-                case 3:
-                    activateDiscount();
-                    break;
-
-                case 4:
-                    deactivateDiscount();
-                    break;
-
-                case 0:
-                    return;
-            }
-        }
-    }
-
-    private void addDiscount() {
-        System.out.print("Minimum Amount : ");
-        double min = Double.parseDouble(sc.nextLine());
-
-        System.out.print("Discount Percentage : ");
-        double percentage = Double.parseDouble(sc.nextLine());
-
-        Discount discount = new Discount(min, percentage, Status.ACTIVE);
-
-        discountService.createDiscount(discount);
-
-        System.out.println("Discount Added Successfully.");
-    }
-
-    private void viewDiscounts() {
-        List<Discount> discounts = discountService.getAllDiscounts();
-
-        System.out.println("\n==========================================================================================");
-        System.out.printf("%-5s %-10s %-20s %-15s %-12s%n",
-                "No",
-                "ID",
-                "Minimum Amount",
-                "Discount",
-                "Status");
-        System.out.println("==========================================================================================");
-
-        int no = 1;
-
-        for (Discount discount : discounts) {
-            System.out.printf("%-5d %-10s ₹%-19.2f %-14s %-12s%n",
-                    no++,
-                    discount.getId(),
-                    discount.getMinimumAmount(),
-                    String.format("%.2f%%", discount.getDiscountPercentage()),
-                    discount.getStatus());
-        }
-
-        System.out.println("==========================================================================================");
-    }
-
-    private void activateDiscount() {
-        viewDiscounts();
-        System.out.print("Discount Id : ");
-        String id = sc.nextLine();
-
-        Discount discount = new DiscountRepository().findById(id);
-
-        if(discount.getStatus() == Status.INACTIVE) {
-            discount.setStatus(Status.ACTIVE);
-            new DiscountRepository().update(discount);
-            System.out.println("Discount Activated.");
-        }
-        else
-            System.out.println("Discount already Activated.");
-    }
-
-    private void deactivateDiscount() {
-        System.out.print("Discount Id : ");
-        String id = sc.nextLine();
-
-        Discount discount = new DiscountRepository().findById(id);
-
-        if(discount.getStatus() == Status.ACTIVE) {
-            discount.setStatus(Status.INACTIVE);
-            new DiscountRepository().update(discount);
-            System.out.println("Discount Deactivated.");
-        }
-        else
-            System.out.println("Discount already Deactivated.");
-    }
-
     private void viewOrders() {
         List<Order> orders = new OrderRepository().findAll();
 
@@ -487,7 +377,7 @@ public class AdminController {
         }
 
         System.out.println("\n==========================================================================================================================================================================");
-        System.out.printf("%-5s %-10s %-12s %-12s %-15s %-12s %-12s %-12s %-12s %-20s %-22s%n",
+        System.out.printf("%-5s %-10s %-12s %-18s %-18s %-12s %-12s %-12s %-12s %-20s %-22s%n",
                 "No",
                 "Order ID",
                 "Customer",
@@ -509,7 +399,7 @@ public class AdminController {
             double discountAmount = order.getSubtotal() * order.getDiscount() / 100;
             double total = order.getSubtotal() - discountAmount + order.getDeliveryCharge();
 
-            System.out.printf("%-5d %-10s %-12s %-12s %-15s ₹%-11.2f %-11.2f%% ₹%-11.2f ₹%-11.2f %-20s %-22s%n",
+            System.out.printf("%-5d %-10s %-12s %-18s %-18s ₹%-11.2f %-11.2f ₹%-11.2f ₹%-11.2f %-20s %-22s%n",
                     no++,
                     order.getId(),
                     order.getCustomerId(),

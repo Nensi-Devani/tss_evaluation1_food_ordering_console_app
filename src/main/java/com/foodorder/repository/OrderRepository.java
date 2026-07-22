@@ -60,7 +60,10 @@ public class OrderRepository {
             preparedStatement.setDouble(3, order.getDeliveryCharge());
             preparedStatement.setString(4, order.getPaymentType().name());
             preparedStatement.setString(5, order.getOrderState().getStatus());
-            preparedStatement.setInt(6,Integer.parseInt(order.getDeliveryBoyId()));
+            preparedStatement.setObject(
+                    6,
+                    order.getDeliveryBoyId() == null ? null : Long.parseLong(order.getDeliveryBoyId())
+            );
             preparedStatement.setLong(7, Long.parseLong(order.getId()));
 
             preparedStatement.executeUpdate();
@@ -112,7 +115,17 @@ public class OrderRepository {
     public List<Order> findByCustomerId(String customerId) {
         List<Order> customerOrders = new ArrayList<>();
 
-        String query = "SELECT * FROM orders WHERE customer_id = ?";
+//        String query = "SELECT * FROM orders WHERE customer_id = ?";
+
+        String query = """
+                    SELECT
+                        o.*,
+                        r.name AS restaurant_name
+                    FROM orders o
+                    JOIN restaurants r
+                        ON o.restaurant_id = r.restaurant_id
+                    WHERE o.customer_id = ?
+                    """;
 
         try {
             preparedStatement = connection.prepareStatement(query);
@@ -124,7 +137,7 @@ public class OrderRepository {
 
                 order.setId(String.valueOf(resultSet.getLong("order_id")));
                 order.setCustomerId(String.valueOf(resultSet.getLong("customer_id")));
-                order.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+                order.setRestaurantId(String.valueOf(resultSet.getString("restaurant_name")));
 
                 long deliveryBoyId = resultSet.getLong("delivery_boy_id");
 
@@ -151,7 +164,16 @@ public class OrderRepository {
     public List<Order> findByRestaurantId(String restaurantId) {
         List<Order> orders = new ArrayList<>();
 
-        String query = "SELECT * FROM orders WHERE restaurant_id = ?";
+//            String query = "SELECT * FROM orders WHERE restaurant_id = ?";
+        String query = """
+                        SELECT
+                            o.*,
+                            c.name AS customer_name
+                        FROM orders o
+                        JOIN users c
+                            ON o.customer_id = c.user_id
+                        WHERE o.restaurant_id = ?
+                       """;
 
         try {
             preparedStatement = connection.prepareStatement(query);
@@ -163,7 +185,7 @@ public class OrderRepository {
                 Order order = new Order();
 
                 order.setId(String.valueOf(resultSet.getLong("order_id")));
-                order.setCustomerId(String.valueOf(resultSet.getLong("customer_id")));
+                order.setCustomerId(String.valueOf(resultSet.getString("customer_name")));
                 order.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
 
                 long deliveryBoyId = resultSet.getLong("delivery_boy_id");
@@ -193,7 +215,20 @@ public class OrderRepository {
     public List<Order> findByDeliveryBoyId(String deliveryBoyId) {
         List<Order> deliveryOrders = new ArrayList<>();
 
-        String query = "SELECT * FROM orders WHERE delivery_boy_id = ?";
+//        String query = "SELECT * FROM orders WHERE delivery_boy_id = ?";
+
+        String query = """
+                        SELECT
+                            o.*,
+                            c.name AS customer_name,
+                            r.name AS restaurant_name
+                        FROM orders o
+                        JOIN users c
+                            ON o.customer_id = c.user_id
+                        JOIN restaurants r
+                            ON o.restaurant_id = r.restaurant_id
+                        WHERE o.delivery_boy_id = ?
+                       """;
 
         try {
             preparedStatement = connection.prepareStatement(query);
@@ -204,8 +239,8 @@ public class OrderRepository {
                 Order order = new Order();
 
                 order.setId(String.valueOf(resultSet.getLong("order_id")));
-                order.setCustomerId(String.valueOf(resultSet.getLong("customer_id")));
-                order.setRestaurantId(String.valueOf(resultSet.getLong("restaurant_id")));
+                order.setCustomerId(String.valueOf(resultSet.getString("customer_name")));
+                order.setRestaurantId(String.valueOf(resultSet.getString("restaurant_name")));
 
                 long dbId = resultSet.getLong("delivery_boy_id");
 

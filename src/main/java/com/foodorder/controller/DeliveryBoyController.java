@@ -84,7 +84,7 @@ public class DeliveryBoyController {
         System.out.printf("%-5s %-12s %-15s %-15s %-12s %-20s%n",
                 "No",
                 "Order ID",
-                "Customer ID",
+                "Customer",
                 "Restaurant",
                 "Amount",
                 "Status");
@@ -157,7 +157,7 @@ public class DeliveryBoyController {
         System.out.printf("%-5s %-12s %-15s %-15s %-12s%n",
                 "No",
                 "Order ID",
-                "Customer ID",
+                "Customer",
                 "Restaurant",
                 "Amount");
         System.out.println("==============================================================================================================");

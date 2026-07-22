@@ -125,7 +125,7 @@ public class RestaurantController {
         System.out.printf("%-5s %-12s %-15s %-12s %-18s%n",
                 "No",
                 "Order ID",
-                "Customer ID",
+                "Customer",
                 "Amount",
                 "Status");
         System.out.println("======================================================================================================");

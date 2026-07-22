@@ -55,6 +55,18 @@ public class CartRepository {
         throw new CartNotFoundException(MessageConstants.CART_NOT_FOUND);
     }
 
+    public void deleteById(String cartId) {
+        String query = "DELETE FROM carts WHERE cart_id = ?";
+
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, Long.parseLong(cartId));
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     public Cart findById(String id) {
         List<Cart> carts = FileUtil.readData(FileConstants.CARTS_FILE);
 

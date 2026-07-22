@@ -107,6 +107,7 @@ public class OrderService {
         }
 
         cartItemRepository.deleteByCartId(cart.getId());
+        cartRepository.deleteById(cart.getId());
 
         return order;
     }
